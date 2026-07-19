@@ -3,5 +3,14 @@ local.settings.json
 __pycache__/
 .python_packages/
 .venv/
+.venv-ci/
 *.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
 .funcignore
