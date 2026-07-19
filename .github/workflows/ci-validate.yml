@@ -109,16 +109,16 @@ jobs:
         with:
           terraform_version: latest
 
-      - name: Terraform diagnostics
-        run: |
-          terraform version > ../ci-artifacts/terraform-version-plan.txt
-          terraform providers > ../ci-artifacts/terraform-providers-plan.txt
-
       - name: Terraform fmt
         run: terraform fmt -check -recursive
 
       - name: Terraform init
         run: terraform init
+
+      - name: Terraform diagnostics
+        run: |
+          terraform version > ../ci-artifacts/terraform-version-plan.txt
+          terraform providers > ../ci-artifacts/terraform-providers-plan.txt
 
       - name: Terraform validate
         run: terraform validate
