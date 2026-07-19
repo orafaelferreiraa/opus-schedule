@@ -2,12 +2,14 @@
 Relatório de qualidade da biblioteca de cortes (OpusClip).
 
 Enumera os projetos, lê os cortes e avalia quais valem postar combinando:
-- sinais nativos da OpusClip (judgeResult: raw score, hook, coherence, connection);
-- limpeza da fala da transcrição (pausas, repetições, gaguejo, filler);
-- regras rigorosas (gate) + veredito opcional do LLM gpt-5-mini.
+- gate mecânico: limpeza da fala da transcrição (pausas, repetições, gaguejo, filler) + duração;
+- veredito de CONTEÚDO do LLM gpt-5-mini (opcional): o corte tem substância/payoff real
+  para o público do LowOpsCast, não apenas fala limpa e coerente.
 
-`recommended` = passou nas regras E (se use_llm) o LLM aprovou. Independe do layout.
-O mesmo código roda local ou dentro do Function App.
+`recommended` = passou no gate mecânico E (se use_llm) o LLM aprovou o CONTEÚDO.
+Sinais nativos da OpusClip (raw/hook/coherence/connection) são só informativos — não
+discriminam substância (verificado empiricamente: anedotas fracas recebem nota alta).
+Independe do layout. O mesmo código roda local ou dentro do Function App.
 """
 
 from __future__ import annotations
@@ -56,11 +58,15 @@ def build_library_report(
     exclude_project_ids: set[str] | list[str] | None = None,
     rules: dict | None = None,
     use_llm: bool = False,
-    llm_scope: str = "recommended",
+    llm_scope: str = "candidates",
     max_workers: int = 10,
     top_n_per_project: int | None = None,
 ) -> dict:
-    """Monta o relatório de qualidade. `client` é um OpusClient (ou compatível)."""
+    """Monta o relatório de qualidade. `client` é um OpusClient (ou compatível).
+
+    `llm_scope`: "candidates" (default) roda o LLM só nos que passaram o gate
+    mecânico; "all" roda em todos os cortes.
+    """
     exclude = set(exclude_project_ids if exclude_project_ids is not None else DEFAULT_EXCLUDE_PROJECT_IDS)
     projects = [{"projectId": pid} for pid in project_ids] if project_ids else client.list_projects()
 
@@ -85,23 +91,22 @@ def build_library_report(
         analyzed += 1
         projects_out.append({"projectId": pid, "title": title, "_assessed": assessed})
 
-    # recommended = passou nas regras rigorosas. O LLM NÃO reprova: ele ranqueia
-    # e anota o que aparar (fillers/pausas/gancho) via flags + reason.
-    for a in all_assessments:
-        a["recommended"] = bool(a["rule_passed"])
-
     llm_used = False
     llm_settings = LLMSettings() if use_llm else None
     if use_llm and llm_settings and llm_settings.enabled:
-        targets = all_assessments if llm_scope == "all" else [a for a in all_assessments if a["recommended"]]
+        targets = all_assessments if llm_scope == "all" else [a for a in all_assessments if a["rule_passed"]]
         if targets:
             llm_used = True
             with ThreadPoolExecutor(max_workers=max_workers) as pool:
                 verdicts = list(pool.map(lambda a: llm_assess(a["_clip"], llm_settings), targets))
             for a, v in zip(targets, verdicts):
-                a["llm"] = {k: v[k] for k in ("ok", "score", "approve", "flags", "reason")}
+                a["llm"] = {k: v[k] for k in ("ok", "score", "approve", "content_flags", "speech_flags", "reason")}
 
+    # Decisão final: gate mecânico E (se LLM rodou nesse item) aprovação de conteúdo.
     for a in all_assessments:
+        llm = a.get("llm")
+        content_ok = (llm is None) or (bool(llm.get("ok")) and bool(llm.get("approve")))
+        a["recommended"] = bool(a["rule_passed"] and content_ok)
         a.pop("_clip", None)
 
     def _llm_score(a):

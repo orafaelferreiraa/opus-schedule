@@ -1,12 +1,17 @@
 """
 Avaliação de qualidade de cortes para publicação.
 
-Combina três camadas:
-1. Sinais nativos da OpusClip (judgeResult: raw score, hook, coherence, connection).
-2. Limpeza da fala derivada da transcrição (pausas `__silence`, repetições imediatas,
-   cortes de palavra `--`, densidade de fillers) — o que o usuário pediu.
-3. Regras rigorosas determinísticas (gate) + veredito opcional do LLM gpt-5-mini.
+Combina duas camadas:
+1. Regras mecânicas (gate leve): limpeza da fala via transcrição (pausas `__silence`,
+   repetições imediatas, cortes de palavra `--`, densidade de fillers) + duração.
+   Os sinais nativos da OpusClip (raw/hook/coherence/connection) são só informativos —
+   verificado empiricamente que não discriminam qualidade de conteúdo (a própria Opus
+   é "torcedora": dá nota alta pra qualquer anedota bem contada, mesmo sem substância).
+2. Veredito de CONTEÚDO do LLM gpt-5-mini: julga se o corte tem substância/payoff real
+   para o público do LowOpsCast (insight técnico, conselho de carreira, humor genuíno,
+   curiosidade, virada surpreendente) — não apenas "fala limpa e coerente".
 
+recommended = passou no gate mecânico E o LLM aprovou o conteúdo.
 Sem dependência de layout (que a API não expõe de forma confiável).
 """
 
@@ -27,12 +32,10 @@ _FILLERS = {
 }
 _WORD_RE = re.compile(r"[a-zA-ZÀ-ú]+(?:--)?")
 
-# Limiares rigorosos (calibrados na distribuição real de 344 cortes).
+# Gate mecânico (só limpeza de fala + duração — calibrado na distribuição real de
+# 344 cortes). NÃO inclui raw/hook/coherence/connection da OpusClip: são informativos
+# apenas, pois não discriminam substância de conteúdo (ver docstring do módulo).
 DEFAULT_RULES = {
-    "min_raw": 35,
-    "min_hook": 9,
-    "min_coherence": 9,
-    "min_connection": 8,
     "max_pauses_per_min": 6.0,
     "max_reps": 2,
     "max_cutoffs": 3,
@@ -71,23 +74,10 @@ def extract_speech_signals(clip: dict) -> dict:
 
 
 def rule_verdict(clip: dict, signals: dict, rules: dict | None = None) -> dict:
-    """Aplica as regras rigorosas. Retorna {passed, reasons}."""
+    """Aplica o gate mecânico (limpeza de fala + duração). Retorna {passed, reasons}."""
     r = {**DEFAULT_RULES, **(rules or {})}
-    jr = clip.get("judgeResult") or {}
-    raw = _num(jr.get("score"))
-    hook = _num(jr.get("hookScore"))
-    coh = _num(jr.get("coherenceScore"))
-    conn = _num(jr.get("connectionScore"))
     reasons: list[str] = []
 
-    if raw is None or raw < r["min_raw"]:
-        reasons.append(f"raw {raw if raw is not None else '—'}<{r['min_raw']}")
-    if hook is None or hook < r["min_hook"]:
-        reasons.append(f"hook {hook if hook is not None else '—'}<{r['min_hook']}")
-    if coh is None or coh < r["min_coherence"]:
-        reasons.append(f"coerência {coh if coh is not None else '—'}<{r['min_coherence']}")
-    if conn is None or conn < r["min_connection"]:
-        reasons.append(f"conexão {conn if conn is not None else '—'}<{r['min_connection']}")
     if signals["pauses_per_min"] > r["max_pauses_per_min"]:
         reasons.append(f"pausas {signals['pauses_per_min']}/min>{r['max_pauses_per_min']}")
     if signals["reps"] > r["max_reps"]:
@@ -108,13 +98,29 @@ def rule_verdict(clip: dict, signals: dict, rules: dict | None = None) -> dict:
 # ---------------------------------------------------------------------------
 
 _LLM_SYSTEM = (
-    "Você é um curador de cortes de podcast de tecnologia/DevOps (PT-BR) para YouTube "
-    "Shorts e TikTok. Julgue se o corte está BOM PARA POSTAR como está. Penalize: "
-    "palavras repetidas/gaguejo, muitas pausas, excesso de fillers (tipo, né, cara), "
-    "gancho fraco, ideia incompleta ou que não faz sentido sozinha. "
-    "Responda SOMENTE JSON com as chaves: final_score (0-100 int), approve (bool), "
-    "flags (array com zero ou mais de: 'repeticao','pausas','filler','gancho_fraco',"
-    "'incoerente','incompleto'), reason (frase curta em PT-BR)."
+    "Você é um curador CRÍTICO e exigente de cortes virais para o LowOpsCast, um podcast "
+    "de tecnologia/DevOps brasileiro. Público: profissionais de TI, 25-34 anos, majoritariamente "
+    "homens, BR. Cortes que funcionam trazem PELO MENOS UM destes payoffs concretos: "
+    "(1) insight técnico específico e útil; (2) conselho de carreira acionável (ex: certificações, "
+    "como entrar na área, ATS, mudança de carreira); (3) humor genuíno sobre a rotina de TI/DevOps "
+    "(ex: 'deploy sexta 17h59', crise de produção); (4) fato surpreendente ou curiosidade regional "
+    "(ex: Pomerode, Floripa, comparação Brasil x exterior); (5) uma virada de história genuinamente "
+    "inesperada com uma LIÇÃO clara e explícita no final.\n\n"
+    "REJEITE (approve=false) sempre que o corte for: uma anedota pessoal genérica sem lição/insight "
+    "claro (ex: 'quando eu era criança eu gostava de computador e um tio me deu o dele'); uma "
+    "história sem virada nem payoff; conteúdo raso que não ensina, não surpreende e não diverte "
+    "nada específico; ou que só faz sentido com contexto externo que o corte não dá.\n\n"
+    "IMPORTANTE: 'a fala flui bem e é coerente' NÃO é critério de aprovação — isso é só qualidade "
+    "de edição. O approve deve refletir EXCLUSIVAMENTE se o CONTEÚDO tem substância suficiente para "
+    "fazer um estranho parar de rolar o feed e sentir que valeu o tempo assistido. Seja rigoroso: "
+    "quando em dúvida, reprove. Ignore qualidade de fala (pausas/repetições/fillers) na decisão de "
+    "approve — isso entra só em speech_flags, como nota de polimento.\n\n"
+    "Responda SOMENTE JSON com as chaves: final_score (0-100 int, baseado na força do CONTEÚDO), "
+    "approve (bool, o conteúdo tem substância/payoff real), "
+    "content_flags (array com zero ou mais de: 'sem_payoff','generico','anedota_fraca',"
+    "'fora_do_tema','previsivel','sem_insight','gancho_fraco','incompleto'), "
+    "speech_flags (array com zero ou mais de: 'repeticao','pausas','filler','gaguejo'), "
+    "reason (frase curta em PT-BR explicando o approve com foco em CONTEÚDO)."
 )
 
 
@@ -147,7 +153,12 @@ class LLMSettings:
 
 
 def llm_assess(clip: dict, settings: LLMSettings) -> dict:
-    """Chama o gpt-5-mini para julgar o corte. Retorna {score, approve, flags, reason, ok}."""
+    """Chama o gpt-5-mini para julgar SUBSTÂNCIA DE CONTEÚDO do corte.
+
+    Retorna {ok, score, approve, content_flags, speech_flags, reason}. `approve`
+    reflete só o conteúdo (payoff/insight/humor/curiosidade) — qualidade de fala
+    fica em `speech_flags` como nota de polimento, não afeta approve.
+    """
     title = str(clip.get("title", "") or "")
     transcript = str(clip.get("text", "") or "").replace("__silence", " [pausa] ")[:4000]
     body = {
@@ -169,8 +180,16 @@ def llm_assess(clip: dict, settings: LLMSettings) -> dict:
             "ok": True,
             "score": int(data.get("final_score", 0)),
             "approve": bool(data.get("approve", False)),
-            "flags": [str(f) for f in (data.get("flags") or [])],
+            "content_flags": [str(f) for f in (data.get("content_flags") or [])],
+            "speech_flags": [str(f) for f in (data.get("speech_flags") or [])],
             "reason": str(data.get("reason", ""))[:280],
         }
     except Exception as exc:  # noqa: BLE001 - falha do LLM não derruba o relatório
-        return {"ok": False, "score": None, "approve": None, "flags": [], "reason": f"llm_error: {type(exc).__name__}"}
+        return {
+            "ok": False,
+            "score": None,
+            "approve": None,
+            "content_flags": [],
+            "speech_flags": [],
+            "reason": f"llm_error: {type(exc).__name__}",
+        }

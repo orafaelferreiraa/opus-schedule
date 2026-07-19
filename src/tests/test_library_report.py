@@ -50,26 +50,35 @@ def _find(report, cid):
     raise AssertionError(f"clip {cid} não encontrado")
 
 
-def test_rigorous_rules_filter():
+def test_mechanical_gate_filters_speech_issues():
     projects = [{"projectId": "P1", "sourceInfo": {"title": "Ep1"}}]
     clips = {
         "P1": [
-            _clip("P1.ok"),                                        # passa
-            _clip("P1.rawlow", raw=34),                            # raw < 35
+            _clip("P1.ok"),
             _clip("P1.pausas", text=("boa " + "__silence bom " * 9)),  # 9 pausas/min > 6
-            _clip("P1.reps", text="pra pra pra pra tudo aqui agora"),   # 3 repetições
-            _clip("P1.longo", dur_ms=200000),                      # duração > 90s
+            _clip("P1.reps", text="pra pra pra pra tudo aqui agora"),
+            _clip("P1.longo", dur_ms=200000),
         ]
     }
     rep = build_library_report(FakeClient(projects, clips), use_llm=False)
-    assert rep["total_clips"] == 5
-    assert rep["recommended_total"] == 1
+    assert rep["total_clips"] == 4
+    # sem LLM, recommended = só o gate mecânico
     assert _find(rep, "P1.ok")["recommended"] is True
-    assert _find(rep, "P1.rawlow")["recommended"] is False
-    assert any("raw" in r for r in _find(rep, "P1.rawlow")["rule_reasons"])
+    assert _find(rep, "P1.pausas")["recommended"] is False
     assert any("pausas" in r for r in _find(rep, "P1.pausas")["rule_reasons"])
     assert any("repet" in r for r in _find(rep, "P1.reps")["rule_reasons"])
     assert any("duração" in r for r in _find(rep, "P1.longo")["rule_reasons"])
+
+
+def test_mechanical_gate_ignores_opus_native_scores():
+    # raw/hook/coherence/connection altos NÃO bastam para passar se a fala for ruim,
+    # e raw/hook baixos NÃO reprovam se a fala estiver limpa (só informativo agora).
+    projects = [{"projectId": "P1"}]
+    clips = {"P1": [_clip("P1.lowscore_cleanspeech", raw=10, hook=1, coh=1, conn=1)]}
+    rep = build_library_report(FakeClient(projects, clips), use_llm=False)
+    c = _find(rep, "P1.lowscore_cleanspeech")
+    assert c["recommended"] is True
+    assert c["raw"] == 10  # ainda reportado, só não usado no gate
 
 
 def test_speech_signals_exposed():
@@ -88,32 +97,55 @@ def test_excludes_personal_by_default():
     assert rep["projects_analyzed"] == 1
 
 
-def test_llm_annotates_but_does_not_gate(monkeypatch):
+def test_llm_content_gate_rejects_weak_anecdote(monkeypatch):
+    """Caso real que motivou a mudança: fala limpa/coerente mas anedota sem payoff."""
+    monkeypatch.setenv("JUDGE_AZURE_OPENAI_ENDPOINT", "https://foundry.example")
+
+    def fake_llm(clip, settings):
+        if clip.get("id") == "P1.weak":
+            return {
+                "ok": True, "score": 30, "approve": False,
+                "content_flags": ["sem_payoff", "anedota_fraca"], "speech_flags": [],
+                "reason": "anedota pessoal sem lição clara",
+            }
+        return {
+            "ok": True, "score": 85, "approve": True,
+            "content_flags": [], "speech_flags": ["filler"],
+            "reason": "dica de carreira concreta e acionável",
+        }
+
+    monkeypatch.setattr(library_report, "llm_assess", fake_llm)
+    projects = [{"projectId": "P1"}]
+    clips = {"P1": [_clip("P1.weak"), _clip("P1.strong")]}
+    rep = build_library_report(FakeClient(projects, clips), use_llm=True)
+
+    weak = _find(rep, "P1.weak")
+    strong = _find(rep, "P1.strong")
+    assert weak["rule_passed"] is True  # fala limpa, passaria no gate mecânico sozinho
+    assert weak["recommended"] is False  # mas o LLM reprova por falta de conteúdo
+    assert "sem_payoff" in weak["llm"]["content_flags"]
+    assert strong["recommended"] is True
+    assert strong["llm"]["approve"] is True
+
+
+def test_llm_only_runs_on_mechanical_candidates_by_default(monkeypatch):
     monkeypatch.setenv("JUDGE_AZURE_OPENAI_ENDPOINT", "https://foundry.example")
     calls = []
 
     def fake_llm(clip, settings):
         calls.append(clip.get("id"))
-        return {"ok": True, "score": 72, "approve": False, "flags": ["filler"], "reason": "aparar fillers"}
+        return {"ok": True, "score": 90, "approve": True, "content_flags": [], "speech_flags": [], "reason": "ok"}
 
     monkeypatch.setattr(library_report, "llm_assess", fake_llm)
     projects = [{"projectId": "P1"}]
-    clips = {"P1": [_clip("P1.ok"), _clip("P1.bad", raw=20)]}
-    rep = build_library_report(FakeClient(projects, clips), use_llm=True)
-
-    assert rep["llm_used"] is True
-    ok = _find(rep, "P1.ok")
-    # regra passa -> recomendado, mesmo o LLM tendo approve=False (LLM só anota)
-    assert ok["recommended"] is True
-    assert ok["llm"]["reason"] == "aparar fillers"
-    # LLM roda só nos recomendados por padrão (não no P1.bad que falhou nas regras)
-    assert calls == ["P1.ok"]
-    assert _find(rep, "P1.bad")["recommended"] is False
+    clips = {"P1": [_clip("P1.ok"), _clip("P1.longo", dur_ms=200000)]}
+    build_library_report(FakeClient(projects, clips), use_llm=True)
+    assert calls == ["P1.ok"]  # P1.longo falhou no gate mecânico, não chama o LLM
 
 
 def test_analyze_library_endpoint(patch_telemetry):
     projects = [{"projectId": "P1", "sourceInfo": {"title": "Ep1"}}]
-    clips = {"P1": [_clip("P1.ok"), _clip("P1.bad", raw=20)]}
+    clips = {"P1": [_clip("P1.ok"), _clip("P1.longo", dur_ms=200000)]}
     patch_telemetry.setattr(function_app, "OpusClient", lambda: FakeClient(projects, clips))
 
     req = func.HttpRequest(

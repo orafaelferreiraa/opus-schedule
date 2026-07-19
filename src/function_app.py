@@ -541,15 +541,16 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
 def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
     """Relatório de qualidade dos cortes da biblioteca (quais valem postar).
 
-    Combina sinais nativos da OpusClip (raw/hook/coherence/connection), limpeza da
-    fala (pausas/repetições/gaguejo/filler da transcrição) e, opcionalmente, o LLM
-    gpt-5-mini. `recommended` = passou nas regras E (se use_llm) o LLM aprovou.
-    Independente de layout. Body JSON (tudo opcional):
+    Gate mecânico (limpeza de fala via transcrição + duração) + veredito de CONTEÚDO
+    do LLM gpt-5-mini (payoff/insight/humor real para o público do LowOpsCast, não
+    apenas fala limpa). `recommended` = passou no gate E (se use_llm) o LLM aprovou o
+    conteúdo. Independente de layout. Body JSON (tudo opcional):
     {
         "project_ids": ["P..."],          # default: todos (menos os vídeos pessoais)
         "exclude_project_ids": ["P..."],
-        "use_llm": true,                  # roda o gpt-5-mini em cada corte
-        "rules": { "min_raw": 35, "min_hook": 9, "max_pauses_per_min": 6, ... },
+        "use_llm": true,                  # roda o gpt-5-mini nos que passam o gate mecânico
+        "llm_scope": "candidates",        # ou "all" para rodar em todos os cortes
+        "rules": { "max_pauses_per_min": 6, "max_reps": 2, "max_filler_pct": 13, ... },
         "top_n_per_project": 5            # limita cortes retornados por projeto
     }
     """
@@ -573,7 +574,7 @@ def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
                 exclude_project_ids=body.get("exclude_project_ids"),
                 rules=body.get("rules") or None,
                 use_llm=bool(body.get("use_llm", False)),
-                llm_scope=str(body.get("llm_scope", "recommended")),
+                llm_scope=str(body.get("llm_scope", "candidates")),
                 top_n_per_project=body.get("top_n_per_project"),
             )
             mark_ok(
