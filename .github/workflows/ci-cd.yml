@@ -59,13 +59,20 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Login (Service Principal secret fallback)
+        id: azure_login_sp
         if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        continue-on-error: true
         uses: azure/login@v3
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Fail when Azure auth is not configured
-        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        if: >-
+          steps.azure_login_oidc.outcome == 'failure' &&
+          (
+            env.AZURE_CREDENTIALS == '' ||
+            steps.azure_login_sp.outcome == 'failure'
+          )
         run: |
           echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
           echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
@@ -110,13 +117,20 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Login (Service Principal secret fallback)
+        id: azure_login_sp
         if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        continue-on-error: true
         uses: azure/login@v3
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Fail when Azure auth is not configured
-        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        if: >-
+          steps.azure_login_oidc.outcome == 'failure' &&
+          (
+            env.AZURE_CREDENTIALS == '' ||
+            steps.azure_login_sp.outcome == 'failure'
+          )
         run: |
           echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
           echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
@@ -155,13 +169,20 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Azure Login (Service Principal secret fallback)
+        id: azure_login_sp
         if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        continue-on-error: true
         uses: azure/login@v3
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
 
       - name: Fail when Azure auth is not configured
-        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        if: >-
+          steps.azure_login_oidc.outcome == 'failure' &&
+          (
+            env.AZURE_CREDENTIALS == '' ||
+            steps.azure_login_sp.outcome == 'failure'
+          )
         run: |
           echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
           echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
