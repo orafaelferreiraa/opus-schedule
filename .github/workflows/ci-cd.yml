@@ -42,6 +42,8 @@ jobs:
     needs: [test]
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
     defaults:
       run:
         working-directory: infra/terraform
@@ -82,6 +84,19 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Create diagnostics folder
+        run: mkdir -p ../ci-artifacts
+
+      - name: Azure context diagnostics
+        run: |
+          az version > ../ci-artifacts/az-version-plan.json || true
+          az account show > ../ci-artifacts/az-account-plan.json || true
+
+      - name: Terraform diagnostics
+        run: |
+          terraform version > ../ci-artifacts/terraform-version-plan.txt
+          terraform providers > ../ci-artifacts/terraform-providers-plan.txt
+
       - name: Terraform fmt
         run: terraform fmt -recursive
 
@@ -92,7 +107,20 @@ jobs:
         run: terraform validate
 
       - name: Terraform plan
-        run: terraform plan -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        run: |
+          set +e
+          terraform plan -no-color -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" 2>&1 | tee ../ci-artifacts/terraform-plan.log
+          TF_PLAN_EXIT=${PIPESTATUS[0]}
+          echo "Terraform plan exit code: ${TF_PLAN_EXIT}"
+          exit ${TF_PLAN_EXIT}
+
+      - name: Upload plan diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan-diagnostics-${{ github.run_id }}
+          path: infra/ci-artifacts
+          if-no-files-found: warn
 
   terraform-apply:
     if: github.event_name != 'pull_request'
@@ -100,6 +128,8 @@ jobs:
     needs: [terraform-plan]
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      TF_IN_AUTOMATION: "true"
+      TF_INPUT: "false"
     defaults:
       run:
         working-directory: infra/terraform
@@ -140,6 +170,19 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
+      - name: Create diagnostics folder
+        run: mkdir -p ../ci-artifacts
+
+      - name: Azure context diagnostics
+        run: |
+          az version > ../ci-artifacts/az-version-apply.json || true
+          az account show > ../ci-artifacts/az-account-apply.json || true
+
+      - name: Terraform diagnostics
+        run: |
+          terraform version > ../ci-artifacts/terraform-version-apply.txt
+          terraform providers > ../ci-artifacts/terraform-providers-apply.txt
+
       - name: Terraform init
         run: terraform init
 
@@ -165,7 +208,33 @@ jobs:
           fi
 
       - name: Terraform apply
-        run: terraform apply -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+        run: |
+          set +e
+          terraform apply -no-color -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" 2>&1 | tee ../ci-artifacts/terraform-apply.log
+          TF_APPLY_EXIT=${PIPESTATUS[0]}
+          echo "Terraform apply exit code: ${TF_APPLY_EXIT}"
+
+          if [ "${TF_APPLY_EXIT}" -ne 0 ]; then
+            echo "Collecting additional failure diagnostics..."
+            terraform state list > ../ci-artifacts/terraform-state-list-on-failure.txt 2>&1 || true
+            terraform plan -no-color -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
+
+            FUNC_APP_NAME="func-lowopscast-prod"
+            RG_NAME="rg-jsearch"
+            SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            RESOURCE_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}"
+            az resource show --ids "${RESOURCE_ID}" > ../ci-artifacts/function-app-resource-on-failure.json 2>&1 || true
+          fi
+
+          exit ${TF_APPLY_EXIT}
+
+      - name: Upload apply diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-apply-diagnostics-${{ github.run_id }}
+          path: infra/ci-artifacts
+          if-no-files-found: warn
 
   deploy-function:
     if: github.event_name != 'pull_request'
@@ -215,9 +284,24 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Create diagnostics folder
+        run: mkdir -p ../infra/ci-artifacts
+
       - name: Install Azure Functions Core Tools
         run: npm i -g azure-functions-core-tools@4 --unsafe-perm true
 
       - name: Publish Function App
         run: |
-          func azure functionapp publish func-lowopscast-prod --python
+          set +e
+          func azure functionapp publish func-lowopscast-prod --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
+          FUNC_EXIT=${PIPESTATUS[0]}
+          echo "Function publish exit code: ${FUNC_EXIT}"
+          exit ${FUNC_EXIT}
+
+      - name: Upload deploy diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-deploy-diagnostics-${{ github.run_id }}
+          path: infra/ci-artifacts
+          if-no-files-found: warn
