@@ -27,3 +27,33 @@ output "application_insights_name" {
   value       = azurerm_application_insights.core.name
   description = "Dedicated Application Insights name."
 }
+
+output "key_vault_name" {
+  value       = azurerm_key_vault.core.name
+  description = "Key Vault used for runtime secrets."
+}
+
+output "foundry_account_name" {
+  value       = azurerm_cognitive_account.foundry.name
+  description = "Azure OpenAI/Foundry account name used by Judge."
+}
+
+output "foundry_account_id" {
+  value       = azurerm_cognitive_account.foundry.id
+  description = "Azure OpenAI/Foundry account resource id."
+}
+
+output "judge_endpoint" {
+  value       = azurerm_cognitive_account.foundry.endpoint
+  description = "Azure OpenAI endpoint used by Judge requests."
+}
+
+output "judge_primary_deployment_name" {
+  value       = azurerm_cognitive_deployment.judge_primary.name
+  description = "Primary model deployment name for Judge."
+}
+
+output "judge_fallback_deployment_name" {
+  value       = azurerm_cognitive_deployment.judge_fallback.name
+  description = "Fallback model deployment name for Judge."
+}

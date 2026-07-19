@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import httpx
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 from shared.telemetry import attrs, logger
 
@@ -21,6 +22,7 @@ class JudgeSettings:
     threshold: int
     include_review_in_dry_run: bool
     provider: str
+    auth_mode: str
     endpoint: str
     api_key: str
     api_version: str
@@ -44,6 +46,7 @@ class JudgeSettings:
                 )
             ),
             provider=str(os.environ.get("JUDGE_PROVIDER", "foundry")).lower(),
+            auth_mode=str(os.environ.get("JUDGE_AUTH_MODE", "api_key")).lower(),
             endpoint=str(os.environ.get("JUDGE_AZURE_OPENAI_ENDPOINT", "")).rstrip("/"),
             api_key=str(os.environ.get("JUDGE_AZURE_OPENAI_API_KEY", "")),
             api_version=str(os.environ.get("JUDGE_API_VERSION", "2025-01-01-preview")),
@@ -219,8 +222,8 @@ def _run_hard_rules(clip: dict[str, Any], settings: JudgeSettings) -> list[str]:
 
 
 def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deployment: str) -> dict[str, Any]:
-    if not settings.endpoint or not settings.api_key:
-        raise RuntimeError("JUDGE_AZURE_OPENAI_ENDPOINT/JUDGE_AZURE_OPENAI_API_KEY ausentes")
+    if not settings.endpoint:
+        raise RuntimeError("JUDGE_AZURE_OPENAI_ENDPOINT ausente")
 
     url = (
         f"{settings.endpoint}/openai/deployments/{deployment}/chat/completions"
@@ -258,7 +261,7 @@ def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deploymen
         ],
     }
 
-    headers = {"api-key": settings.api_key, "Content-Type": "application/json"}
+    headers = _build_auth_headers(settings)
     timeout_s = max(1.0, settings.timeout_ms / 1000.0)
 
     attempts = max(1, settings.max_retries + 1)
@@ -292,4 +295,24 @@ def _safe_json(content: str) -> dict[str, Any]:
         "final_score": int(data.get("final_score", 0)),
         "soft_signals": data.get("soft_signals", {}) if isinstance(data.get("soft_signals", {}), dict) else {},
         "audit_reason": str(data.get("audit_reason", "")),
+    }
+
+
+def _build_auth_headers(settings: JudgeSettings) -> dict[str, str]:
+    if settings.auth_mode == "managed_identity":
+        token_provider = get_bearer_token_provider(
+            DefaultAzureCredential(exclude_interactive_browser_credential=True),
+            "https://cognitiveservices.azure.com/.default",
+        )
+        return {
+            "Authorization": f"Bearer {token_provider()}",
+            "Content-Type": "application/json",
+        }
+
+    if not settings.api_key:
+        raise RuntimeError("JUDGE_AZURE_OPENAI_API_KEY ausente para auth_mode=api_key")
+
+    return {
+        "api-key": settings.api_key,
+        "Content-Type": "application/json",
     }
