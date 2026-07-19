@@ -75,7 +75,7 @@ jobs:
             steps.azure_login_sp.outcome == 'failure'
           )
         run: |
-          echo "Azure authentication failed."
+          echo "Azure authentication failed in terraform-plan."
           echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
           exit 1
 
@@ -133,7 +133,7 @@ jobs:
             steps.azure_login_sp.outcome == 'failure'
           )
         run: |
-          echo "Azure authentication failed."
+          echo "Azure authentication failed in terraform-apply."
           echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
           exit 1
 
@@ -142,6 +142,27 @@ jobs:
 
       - name: Terraform init
         run: terraform init
+
+      - name: Import existing Function App when needed
+        run: |
+          set -euo pipefail
+          TF_ADDR="azurerm_linux_function_app.lowopscast"
+          if terraform state list | grep -q "^${TF_ADDR}$"; then
+            echo "${TF_ADDR} already present in Terraform state."
+            exit 0
+          fi
+
+          FUNC_APP_NAME="func-lowopscast-prod"
+          RG_NAME="rg-jsearch"
+          SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          RESOURCE_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}"
+
+          if az resource show --ids "${RESOURCE_ID}" >/dev/null 2>&1; then
+            echo "Existing Function App found in Azure. Importing into Terraform state..."
+            terraform import "${TF_ADDR}" "${RESOURCE_ID}"
+          else
+            echo "Function App does not exist in Azure yet. Terraform apply will create it."
+          fi
 
       - name: Terraform apply
         run: terraform apply -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -185,7 +206,7 @@ jobs:
             steps.azure_login_sp.outcome == 'failure'
           )
         run: |
-          echo "Azure authentication failed."
+          echo "Azure authentication failed in deploy-function."
           echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
           exit 1
 
