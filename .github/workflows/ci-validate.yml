@@ -52,6 +52,7 @@ jobs:
       EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
       APP_SERVICE_PLAN_NAME: ${{ vars.APP_SERVICE_PLAN_NAME }}
+      APP_SERVICE_PLAN_SKU: ${{ vars.APP_SERVICE_PLAN_SKU }}
       APPLICATION_INSIGHTS_NAME: ${{ vars.APPLICATION_INSIGHTS_NAME }}
       STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
     defaults:
@@ -127,6 +128,7 @@ jobs:
         run: |
           RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
           PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
+          PLAN_SKU="${APP_SERVICE_PLAN_SKU:-B1}"
           APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
           ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
 
@@ -135,6 +137,7 @@ jobs:
             -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             -var "resource_group_name=${RG_NAME}"
             -var "app_service_plan_name=${PLAN_NAME}"
+            -var "app_service_plan_sku=${PLAN_SKU}"
             -var "application_insights_name=${APPI_NAME}"
           )
 

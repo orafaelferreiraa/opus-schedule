@@ -24,7 +24,7 @@ variable "app_service_plan_name" {
 variable "app_service_plan_sku" {
   description = "SKU for the dedicated Linux App Service plan."
   type        = string
-  default     = "Y1"
+  default     = "B1"
 }
 
 variable "application_insights_name" {
