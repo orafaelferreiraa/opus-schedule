@@ -28,8 +28,8 @@ class FakeClient:
         return list(CLIPS)
 
     def list_collections(self):
-        # A API real devolve IDs (strings), não objetos.
-        return ["col1"]
+        # Formato real: CollectionDto com collectionId (após _extract_list desembrulhar data.list).
+        return [{"collectionId": "col1", "collectionName": "Favoritos"}]
 
     def prepare_clips_for_split_layout(self, clips):
         self.prepared = list(clips)

@@ -1,6 +1,18 @@
 import os
 
-from shared.opus_client import OpusClient
+from shared.opus_client import OpusClient, _extract_list
+
+
+def test_extract_list_unwraps_envelopes():
+    # {data: {list: [...]}} (formato real de /collections e listagens)
+    assert _extract_list({"data": {"list": [{"a": 1}], "total": 1, "limit": 50}}) == [{"a": 1}]
+    # {data: [...]}
+    assert _extract_list({"data": [{"b": 2}]}) == [{"b": 2}]
+    # array cru
+    assert _extract_list([{"c": 3}]) == [{"c": 3}]
+    # nada utilizável
+    assert _extract_list({"foo": "bar"}) == []
+    assert _extract_list("nope") == []
 
 
 def test_prepare_clips_for_split_layout_sends_ai_enhancement_flags(monkeypatch):

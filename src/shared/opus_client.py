@@ -20,6 +20,27 @@ _BASE = "https://api.opus.pro/api"
 _SCHEDULER_RATE_LIMIT_S = 1.1  # 1 req/s para publish-schedules (limite da API)
 
 
+def _extract_list(data: dict | list) -> list[dict]:
+    """Desembrulha a lista de itens das respostas de listagem da OpusClip.
+
+    A API envelopa listas como ``{"data": {"list": [...], "total", "limit"}}``.
+    Também aceita ``{"data": [...]}`` e arrays crus, por robustez.
+    """
+    if isinstance(data, list):
+        return data
+    if not isinstance(data, dict):
+        return []
+    inner = data.get("data", data)
+    if isinstance(inner, list):
+        return inner
+    if isinstance(inner, dict):
+        for key in ("list", "items", "results"):
+            value = inner.get(key)
+            if isinstance(value, list):
+                return value
+    return []
+
+
 class OpusClient:
     def __init__(self) -> None:
         api_key = os.environ["OPUSCLIP_API_KEY"]
@@ -83,8 +104,7 @@ class OpusClient:
 
     def get_social_accounts(self) -> list[dict]:
         """Retorna as contas sociais conectadas a conta OpusClip."""
-        data = self._get("/social-accounts", params={"q": "mine"})
-        return data if isinstance(data, list) else data.get("data", [])
+        return _extract_list(self._get("/social-accounts", params={"q": "mine"}))
 
     # ------------------------------------------------------------------
     # Collections
@@ -96,8 +116,7 @@ class OpusClient:
         É o único ponto de enumeração disponível na API (não há listagem de
         projetos); permite varrer todos os cortes coleção a coleção.
         """
-        data = self._get("/collections", params={"q": "mine"})
-        return data if isinstance(data, list) else data.get("data", [])
+        return _extract_list(self._get("/collections", params={"q": "mine"}))
 
     # ------------------------------------------------------------------
     # Clips
@@ -121,7 +140,7 @@ class OpusClient:
             while True:
                 params = {"q": q, "pageNum": page, "pageSize": page_size, **kwargs}
                 data = self._get("/exportable-clips", params=params)
-                page_clips = data if isinstance(data, list) else data.get("data", [])
+                page_clips = _extract_list(data)
                 if not page_clips:
                     break
                 clips.extend(page_clips)
