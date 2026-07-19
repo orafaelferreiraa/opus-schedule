@@ -87,6 +87,19 @@ class OpusClient:
         return data if isinstance(data, list) else data.get("data", [])
 
     # ------------------------------------------------------------------
+    # Collections
+    # ------------------------------------------------------------------
+
+    def list_collections(self) -> list[dict]:
+        """Lista as coleções da conta (GET /api/collections?q=mine).
+
+        É o único ponto de enumeração disponível na API (não há listagem de
+        projetos); permite varrer todos os cortes coleção a coleção.
+        """
+        data = self._get("/collections", params={"q": "mine"})
+        return data if isinstance(data, list) else data.get("data", [])
+
+    # ------------------------------------------------------------------
     # Clips
     # ------------------------------------------------------------------
 
@@ -118,8 +131,25 @@ class OpusClient:
             mark_ok(span, lowopscast_pages=page, lowopscast_clips_count=len(clips))
         return clips
 
+    # renderPref para forçar o layout "dividir" (split). Só campos do
+    # RenderPreferenceDto documentado — sem removeFillerWord/removePause (que não
+    # existem no DTO e podem fazer o PUT falhar).
+    _SPLIT_RENDER_PREF = {
+        "enableSplitLayout": True,
+        "enableFillLayout": False,
+        "enableFitLayout": False,
+        "disableFillLayout": True,
+        "disableFitLayout": True,
+        "layoutAspectRatio": "portrait",
+    }
+
     def prepare_clips_for_split_layout(self, clips: list[dict]) -> list[dict]:
-        updated: list[dict] = []
+        """Força o layout split em cada corte via PUT /exportable-clips/{id}.
+
+        Retorna um resultado por corte: ``{id, projectId, ok, error?}``. Uma
+        falha individual não aborta o lote (registra ``ok=False`` e segue).
+        """
+        results: list[dict] = []
 
         with tracer.start_as_current_span("opus.prepare_clips_for_split_layout") as span:
             span.set_attribute("lowopscast_clips_count", len(clips))
@@ -128,28 +158,23 @@ class OpusClient:
                 if not full_id:
                     continue
 
-                payload = {
-                    "renderPref": {
-                        "enableSplitLayout": True,
-                        "enableFillLayout": False,
-                        "enableFitLayout": False,
-                        "disableFillLayout": True,
-                        "disableFitLayout": True,
-                        "layoutAspectRatio": "portrait",
-                        "removeFillerWord": True,
-                        "removePause": True,
-                        "enableEmoji": False,
-                    }
-                }
-                self._put(f"/exportable-clips/{full_id}", json=payload)
-                updated.append({
-                    "id": full_id,
-                    "projectId": clip.get("projectId", ""),
-                })
+                entry = {"id": full_id, "projectId": clip.get("projectId", "")}
+                try:
+                    self._put(f"/exportable-clips/{full_id}", json={"renderPref": self._SPLIT_RENDER_PREF})
+                    entry["ok"] = True
+                except Exception as exc:  # noqa: BLE001 - registrar falha e seguir o lote
+                    entry["ok"] = False
+                    entry["error"] = str(exc)[:2048]
+                    logger.error(
+                        "Falha ao converter clip para split layout",
+                        extra={"custom_dimensions": {"lowopscast_clip_id": full_id, "lowopscast_error": entry["error"]}},
+                    )
+                results.append(entry)
 
-            mark_ok(span, lowopscast_clips_updated=len(updated))
+            ok_count = len([r for r in results if r.get("ok")])
+            mark_ok(span, lowopscast_clips_updated=ok_count, lowopscast_clips_failed=len(results) - ok_count)
 
-        return updated
+        return results
 
     # ------------------------------------------------------------------
     # Scheduling

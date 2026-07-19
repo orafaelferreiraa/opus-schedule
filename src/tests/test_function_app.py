@@ -75,7 +75,7 @@ class FakeClient:
 
     def prepare_clips_for_split_layout(self, clips):
         self.updated.extend([clip["id"] for clip in clips])
-        return [{"id": clip["id"], "projectId": clip.get("projectId", "")} for clip in clips]
+        return [{"id": clip["id"], "projectId": clip.get("projectId", ""), "ok": True} for clip in clips]
 
     def create_schedules(self, _plan):
         return [{"ok": True, "clipId": "C1", "network": "YOUTUBE", "scheduleId": "S1"}]

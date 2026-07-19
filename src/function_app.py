@@ -424,7 +424,8 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                         if (clip_project_id, clip_short_id) in planned_keys:
                             clips_to_prepare.append(clip)
 
-                    split_layout_updates = client.prepare_clips_for_split_layout(clips_to_prepare)
+                    prepare_results = client.prepare_clips_for_split_layout(clips_to_prepare)
+                    split_layout_updates = [r for r in prepare_results if r.get("ok")]
                     mark_ok(
                         child_span,
                         lowopscast_clips_in_plan=len(planned_keys),
@@ -526,6 +527,163 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
             mark_error(span, exc, http_status_code=500)
             return func.HttpResponse(
                 json.dumps({"error": "Falha interna ao processar agendamento"}),
+                status_code=500,
+                mimetype="application/json",
+            )
+        finally:
+            elapsed_ms = round((time.perf_counter() - started_at) * 1000, 2)
+            execution_duration_ms.record(elapsed_ms, base_attrs)
+            span.set_attribute("lowopscast_execution_duration_ms", elapsed_ms)
+
+
+def _is_split_layout(clip: dict) -> bool:
+    """True se o corte já está no layout dividir (split) — mesma regra do filtro
+    split_layout_only: split ligado e fill/fit desligados."""
+    render = clip.get("renderPref") or {}
+    return (
+        bool(render.get("enableSplitLayout"))
+        and not bool(render.get("enableFillLayout"))
+        and not bool(render.get("enableFitLayout"))
+    )
+
+
+@app.route(route="convert-clips-to-split", methods=["POST"])
+def convert_clips_to_split(req: func.HttpRequest) -> func.HttpResponse:
+    """Converte cortes em massa para o layout dividir (split), sem agendar.
+
+    Body JSON (todos opcionais, mas informe um alvo):
+    {
+        "collection_id": "...",      # alvo: uma coleção
+        "project_id": "...",         # alvo: um projeto
+        "all_collections": false,    # alvo: varre todas as coleções (GET /collections?q=mine)
+        "only_fill": true,           # só converte os que NÃO estão em split (idempotente)
+        "dry_run": true,             # padrão: só relata o que seria convertido, sem alterar
+        "limit": 1                   # opcional: limita quantos converter (útil p/ validar 1 antes)
+    }
+    """
+    started_at = time.perf_counter()
+
+    with tracer.start_as_current_span("lowopscast.convert_clips_to_split") as span:
+        base_attrs = attrs(faas_name="convert-clips-to-split", faas_trigger="http", http_method=req.method)
+        for key, value in base_attrs.items():
+            span.set_attribute(key, value)
+        invocation_counter.add(1, base_attrs)
+
+        try:
+            try:
+                body = req.get_json()
+            except ValueError:
+                body = {}
+
+            collection_id = body.get("collection_id")
+            project_id = body.get("project_id")
+            all_collections = bool(body.get("all_collections", False))
+            only_fill = bool(body.get("only_fill", True))
+            dry_run = bool(body.get("dry_run", True))
+            raw_limit = body.get("limit")
+            limit = int(raw_limit) if isinstance(raw_limit, int) or (isinstance(raw_limit, str) and raw_limit.isdigit()) else None
+
+            if not (collection_id or project_id or all_collections):
+                mark_ok(span, http_status_code=400, error_type="missing_target")
+                return func.HttpResponse(
+                    json.dumps({"error": "Informe 'collection_id', 'project_id' ou 'all_collections': true"}),
+                    status_code=400,
+                    mimetype="application/json",
+                )
+
+            client = OpusClient()
+            clips: list[dict] = []
+            sources: list[str] = []
+
+            if project_id:
+                clips = client.get_clips_by_project(str(project_id))
+                sources.append(f"project:{project_id}")
+            elif collection_id:
+                clips = client.get_clips_by_collection(str(collection_id))
+                sources.append(f"collection:{collection_id}")
+            else:
+                collections = client.list_collections()
+                seen_ids: set[str] = set()
+                for col in collections:
+                    cid = str(col.get("id") or col.get("collectionId") or "")
+                    if not cid:
+                        continue
+                    sources.append(f"collection:{cid}")
+                    for clip in client.get_clips_by_collection(cid):
+                        full_id = str(clip.get("id", ""))
+                        if full_id and full_id not in seen_ids:
+                            seen_ids.add(full_id)
+                            clips.append(clip)
+
+            total_clips = len(clips)
+            already_split = [c for c in clips if _is_split_layout(c)]
+            targets = [c for c in clips if not _is_split_layout(c)] if only_fill else list(clips)
+            if limit and limit > 0:
+                targets = targets[:limit]
+
+            mark_ok(
+                span,
+                lowopscast_sources_count=len(sources),
+                lowopscast_total_clips=total_clips,
+                lowopscast_already_split=len(already_split),
+                lowopscast_to_convert=len(targets),
+                lowopscast_dry_run=dry_run,
+            )
+            logger.info(
+                "convert_clips_to_split alvo definido",
+                extra={
+                    "custom_dimensions": {
+                        **base_attrs,
+                        "lowopscast_total_clips": total_clips,
+                        "lowopscast_already_split": len(already_split),
+                        "lowopscast_to_convert": len(targets),
+                        "lowopscast_dry_run": dry_run,
+                    }
+                },
+            )
+
+            if dry_run:
+                return func.HttpResponse(
+                    json.dumps(
+                        {
+                            "dry_run": True,
+                            "sources": sources,
+                            "total_clips": total_clips,
+                            "already_split": len(already_split),
+                            "to_convert": len(targets),
+                            "to_convert_ids": [str(c.get("id", "")) for c in targets],
+                        },
+                        default=str,
+                    ),
+                    status_code=200,
+                    mimetype="application/json",
+                )
+
+            results = client.prepare_clips_for_split_layout(targets)
+            converted = [r for r in results if r.get("ok")]
+            failed = [r for r in results if not r.get("ok")]
+
+            return func.HttpResponse(
+                json.dumps(
+                    {
+                        "dry_run": False,
+                        "sources": sources,
+                        "total_clips": total_clips,
+                        "already_split": len(already_split),
+                        "converted": len(converted),
+                        "failed": len(failed),
+                        "failures": failed,
+                    },
+                    default=str,
+                ),
+                status_code=200,
+                mimetype="application/json",
+            )
+        except Exception as exc:
+            logger.exception("Falha nao tratada em convert_clips_to_split", extra={"custom_dimensions": base_attrs})
+            mark_error(span, exc, http_status_code=500)
+            return func.HttpResponse(
+                json.dumps({"error": "Falha interna ao converter clips para split"}),
                 status_code=500,
                 mimetype="application/json",
             )
