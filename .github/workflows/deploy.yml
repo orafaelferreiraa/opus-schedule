@@ -43,7 +43,8 @@ jobs:
       TF_VAR_opusclip_api_key: ${{ secrets.OPUSCLIP_API_KEY }}
       TF_VAR_opusclip_org_id: ${{ secrets.OPUSCLIP_ORG_ID }}
       TF_VAR_notification_email_to: ${{ vars.NOTIFICATION_EMAIL_TO }}
-      TF_VAR_notification_email_from: ${{ vars.NOTIFICATION_EMAIL_FROM }}
+      # Fallback para o default quando a variável não está definida (não sobrescrever com vazio).
+      TF_VAR_notification_email_from: ${{ vars.NOTIFICATION_EMAIL_FROM || 'noreply@orafaelferreira.com' }}
     defaults:
       run:
         working-directory: infra/terraform
