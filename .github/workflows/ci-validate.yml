@@ -54,7 +54,6 @@ jobs:
       APP_SERVICE_PLAN_NAME: ${{ vars.APP_SERVICE_PLAN_NAME }}
       APPLICATION_INSIGHTS_NAME: ${{ vars.APPLICATION_INSIGHTS_NAME }}
       STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -105,31 +104,6 @@ jobs:
             exit 1
           fi
 
-      - name: Preflight Azure resources
-        run: |
-          set +e
-          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
-          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-jobfinder-prod}"
-          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-jobfinder-prod}"
-          ST_NAME="${STORAGE_ACCOUNT_NAME:-stjobfinderprodrandonix}"
-          KV_NAME="${KEY_VAULT_NAME:-kv-jf-prod-randonix}"
-
-          az appservice plan show -g "${RG_NAME}" -n "${PLAN_NAME}" > ../ci-artifacts/preflight-plan.json 2>&1
-          PLAN_RC=$?
-          az monitor app-insights component show -g "${RG_NAME}" -a "${APPI_NAME}" > ../ci-artifacts/preflight-appi.json 2>&1
-          APPI_RC=$?
-          az storage account show -g "${RG_NAME}" -n "${ST_NAME}" > ../ci-artifacts/preflight-storage.json 2>&1
-          ST_RC=$?
-          az keyvault show -g "${RG_NAME}" -n "${KV_NAME}" > ../ci-artifacts/preflight-keyvault.json 2>&1
-          KV_RC=$?
-
-          echo "plan=${PLAN_RC} appi=${APPI_RC} storage=${ST_RC} keyvault=${KV_RC}" | tee ../ci-artifacts/preflight-summary.txt
-
-          if [ ${PLAN_RC} -ne 0 ] || [ ${APPI_RC} -ne 0 ] || [ ${ST_RC} -ne 0 ] || [ ${KV_RC} -ne 0 ]; then
-            echo "Preflight failed: one or more required Azure resources were not found in the configured subscription/resource group."
-            exit 1
-          fi
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
 
@@ -149,20 +123,25 @@ jobs:
 
       - name: Terraform plan
         run: |
-          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
-          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-jobfinder-prod}"
-          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-jobfinder-prod}"
-          ST_NAME="${STORAGE_ACCOUNT_NAME:-stjobfinderprodrandonix}"
-          KV_NAME="${KEY_VAULT_NAME:-kv-jf-prod-randonix}"
+          RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
+          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
+          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
+          ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
 
           set +e
+          TF_ARGS=(
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            -var "resource_group_name=${RG_NAME}"
+            -var "app_service_plan_name=${PLAN_NAME}"
+            -var "application_insights_name=${APPI_NAME}"
+          )
+
+          if [ -n "${ST_NAME}" ]; then
+            TF_ARGS+=( -var "storage_account_name=${ST_NAME}" )
+          fi
+
           terraform plan -no-color \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            -var "resource_group_name=${RG_NAME}" \
-            -var "app_service_plan_name=${PLAN_NAME}" \
-            -var "application_insights_name=${APPI_NAME}" \
-            -var "storage_account_name=${ST_NAME}" \
-            -var "key_vault_name=${KV_NAME}" \
+            "${TF_ARGS[@]}" \
             2>&1 | tee ../ci-artifacts/terraform-plan.log
           TF_PLAN_EXIT=${PIPESTATUS[0]}
           echo "Terraform plan exit code: ${TF_PLAN_EXIT}"

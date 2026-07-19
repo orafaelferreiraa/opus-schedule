@@ -8,7 +8,22 @@ output "function_app_principal_id" {
   description = "Managed identity principal id for RBAC/Key Vault access policies."
 }
 
-output "existing_key_vault_id" {
-  value       = data.azurerm_key_vault.existing.id
-  description = "Existing Key Vault used by the workload."
+output "resource_group_name" {
+  value       = azurerm_resource_group.core.name
+  description = "Dedicated resource group for this stack."
+}
+
+output "service_plan_id" {
+  value       = azurerm_service_plan.core.id
+  description = "Dedicated App Service plan id."
+}
+
+output "storage_account_name" {
+  value       = azurerm_storage_account.core.name
+  description = "Dedicated storage account name."
+}
+
+output "application_insights_name" {
+  value       = azurerm_application_insights.core.name
+  description = "Dedicated Application Insights name."
 }

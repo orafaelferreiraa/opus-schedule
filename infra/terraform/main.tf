@@ -1,37 +1,59 @@
-data "azurerm_resource_group" "core" {
-  name = var.resource_group_name
+resource "random_string" "storage_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+  numeric = true
 }
 
-data "azurerm_service_plan" "existing" {
+resource "random_string" "function_suffix" {
+  length  = 6
+  special = false
+  upper   = false
+  numeric = true
+}
+
+locals {
+  resolved_storage_account_name = var.storage_account_name != "" ? var.storage_account_name : "stlowops${random_string.storage_suffix.result}"
+  resolved_function_app_name    = var.function_app_name != "" ? var.function_app_name : "func-lowopscast-${random_string.function_suffix.result}"
+}
+
+resource "azurerm_resource_group" "core" {
+  name     = var.resource_group_name
+  location = var.location
+}
+
+resource "azurerm_service_plan" "core" {
   name                = var.app_service_plan_name
-  resource_group_name = data.azurerm_resource_group.core.name
+  resource_group_name = azurerm_resource_group.core.name
+  location            = azurerm_resource_group.core.location
+  os_type             = "Linux"
+  sku_name            = var.app_service_plan_sku
 }
 
-data "azurerm_application_insights" "existing" {
+resource "azurerm_application_insights" "core" {
   name                = var.application_insights_name
-  resource_group_name = data.azurerm_resource_group.core.name
+  location            = azurerm_resource_group.core.location
+  resource_group_name = azurerm_resource_group.core.name
+  application_type    = "web"
 }
 
-data "azurerm_storage_account" "existing" {
-  name                = var.storage_account_name
-  resource_group_name = data.azurerm_resource_group.core.name
+resource "azurerm_storage_account" "core" {
+  name                     = local.resolved_storage_account_name
+  resource_group_name      = azurerm_resource_group.core.name
+  location                 = azurerm_resource_group.core.location
+  account_tier             = "Standard"
+  account_replication_type = var.storage_replication_type
+  min_tls_version          = "TLS1_2"
 }
 
-data "azurerm_key_vault" "existing" {
-  name                = var.key_vault_name
-  resource_group_name = data.azurerm_resource_group.core.name
-}
-
-# Existing shared resources are read via data sources.
-# The Function App below is created by Terraform.
-# Only run terraform import if this Function App was already created outside Terraform.
+# This stack is intentionally isolated and provisions its own shared resources.
 resource "azurerm_linux_function_app" "lowopscast" {
-  name                       = var.function_app_name
-  resource_group_name        = data.azurerm_resource_group.core.name
+  name                       = local.resolved_function_app_name
+  resource_group_name        = azurerm_resource_group.core.name
   location                   = var.location
-  service_plan_id            = data.azurerm_service_plan.existing.id
-  storage_account_name       = data.azurerm_storage_account.existing.name
-  storage_account_access_key = data.azurerm_storage_account.existing.primary_access_key
+  service_plan_id            = azurerm_service_plan.core.id
+  storage_account_name       = azurerm_storage_account.core.name
+  storage_account_access_key = azurerm_storage_account.core.primary_access_key
 
   site_config {
     application_stack {
@@ -41,8 +63,8 @@ resource "azurerm_linux_function_app" "lowopscast" {
 
   app_settings = {
     FUNCTIONS_WORKER_RUNTIME              = "python"
-    APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.existing.connection_string
-    OTEL_SERVICE_NAME                     = "func-lowopscast-prod"
+    APPLICATIONINSIGHTS_CONNECTION_STRING = azurerm_application_insights.core.connection_string
+    OTEL_SERVICE_NAME                     = local.resolved_function_app_name
     JUDGE_MODE                            = "off"
     JUDGE_PROVIDER                        = "foundry"
     JUDGE_MODEL_DEPLOYMENT_PRIMARY        = var.judge_primary_model

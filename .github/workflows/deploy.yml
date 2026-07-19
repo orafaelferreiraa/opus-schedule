@@ -20,6 +20,8 @@ jobs:
   terraform-apply:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      function_app_name: ${{ steps.tf_output.outputs.function_app_name }}
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       TF_IN_AUTOMATION: "true"
@@ -30,7 +32,6 @@ jobs:
       APP_SERVICE_PLAN_NAME: ${{ vars.APP_SERVICE_PLAN_NAME }}
       APPLICATION_INSIGHTS_NAME: ${{ vars.APPLICATION_INSIGHTS_NAME }}
       STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
-      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -89,63 +90,46 @@ jobs:
       - name: Terraform init
         run: terraform init
 
-      - name: Import existing Function App when needed
-        run: |
-          set -euo pipefail
-          TF_ADDR="azurerm_linux_function_app.lowopscast"
-          if terraform state list | grep -q "^${TF_ADDR}$"; then
-            echo "${TF_ADDR} already present in Terraform state."
-            exit 0
-          fi
-
-          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
-          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
-          SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-          RESOURCE_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}"
-
-          if az resource show --ids "${RESOURCE_ID}" >/dev/null 2>&1; then
-            echo "Existing Function App found in Azure. Importing into Terraform state..."
-            terraform import "${TF_ADDR}" "${RESOURCE_ID}"
-          else
-            echo "Function App does not exist in Azure yet. Terraform apply will create it."
-          fi
-
       - name: Terraform apply
         run: |
-          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
-          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-jobfinder-prod}"
-          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-jobfinder-prod}"
-          ST_NAME="${STORAGE_ACCOUNT_NAME:-stjobfinderprodrandonix}"
-          KV_NAME="${KEY_VAULT_NAME:-kv-jf-prod-randonix}"
-          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
+          RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
+          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
+          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
+          ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
+          FUNC_APP_NAME="${FUNCTION_APP_NAME:-}"
+
+          TF_ARGS=(
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            -var "resource_group_name=${RG_NAME}"
+            -var "app_service_plan_name=${PLAN_NAME}"
+            -var "application_insights_name=${APPI_NAME}"
+          )
+
+          if [ -n "${ST_NAME}" ]; then
+            TF_ARGS+=( -var "storage_account_name=${ST_NAME}" )
+          fi
+          if [ -n "${FUNC_APP_NAME}" ]; then
+            TF_ARGS+=( -var "function_app_name=${FUNC_APP_NAME}" )
+          fi
 
           set +e
-          terraform apply -no-color -auto-approve \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            -var "resource_group_name=${RG_NAME}" \
-            -var "function_app_name=${FUNC_APP_NAME}" \
-            -var "app_service_plan_name=${PLAN_NAME}" \
-            -var "application_insights_name=${APPI_NAME}" \
-            -var "storage_account_name=${ST_NAME}" \
-            -var "key_vault_name=${KV_NAME}" \
-            2>&1 | tee ../ci-artifacts/terraform-apply.log
+          terraform apply -no-color -auto-approve "${TF_ARGS[@]}" 2>&1 | tee ../ci-artifacts/terraform-apply.log
           TF_APPLY_EXIT=${PIPESTATUS[0]}
           echo "Terraform apply exit code: ${TF_APPLY_EXIT}"
 
           if [ "${TF_APPLY_EXIT}" -ne 0 ]; then
             terraform state list > ../ci-artifacts/terraform-state-list-on-failure.txt 2>&1 || true
-            terraform plan -no-color \
-              -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-              -var "resource_group_name=${RG_NAME}" \
-              -var "function_app_name=${FUNC_APP_NAME}" \
-              -var "app_service_plan_name=${PLAN_NAME}" \
-              -var "application_insights_name=${APPI_NAME}" \
-              -var "storage_account_name=${ST_NAME}" \
-              -var "key_vault_name=${KV_NAME}" \
-              > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
+            terraform plan -no-color "${TF_ARGS[@]}" > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
           fi
 
           exit ${TF_APPLY_EXIT}
+
+      - name: Capture Function App name from Terraform output
+        id: tf_output
+        run: |
+          APP_NAME="$(terraform output -raw function_app_name)"
+          echo "function_app_name=${APP_NAME}" >> "$GITHUB_OUTPUT"
+          echo "Function app resolved for deploy: ${APP_NAME}"
 
       - name: Upload apply diagnostics
         if: always()
@@ -162,7 +146,7 @@ jobs:
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
+      DEPLOY_FUNCTION_APP_NAME: ${{ needs.terraform-apply.outputs.function_app_name }}
     defaults:
       run:
         working-directory: src
@@ -225,9 +209,8 @@ jobs:
 
       - name: Publish Function App
         run: |
-          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
           set +e
-          func azure functionapp publish "${FUNC_APP_NAME}" --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
+          func azure functionapp publish "${DEPLOY_FUNCTION_APP_NAME}" --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
           FUNC_EXIT=${PIPESTATUS[0]}
           echo "Function publish exit code: ${FUNC_EXIT}"
           exit ${FUNC_EXIT}

@@ -4,9 +4,9 @@ variable "subscription_id" {
 }
 
 variable "resource_group_name" {
-  description = "Existing resource group name."
+  description = "Resource group name for the isolated stack."
   type        = string
-  default     = "rg-jsearch"
+  default     = "rg-lowopscast-schedule"
 }
 
 variable "location" {
@@ -16,33 +16,45 @@ variable "location" {
 }
 
 variable "app_service_plan_name" {
-  description = "Existing App Service plan used by Function App."
+  description = "App Service plan name for the isolated stack."
   type        = string
-  default     = "plan-jobfinder-prod"
+  default     = "plan-lowopscast-schedule"
+}
+
+variable "app_service_plan_sku" {
+  description = "SKU for the dedicated Linux App Service plan."
+  type        = string
+  default     = "Y1"
 }
 
 variable "application_insights_name" {
-  description = "Existing Application Insights instance."
+  description = "Application Insights name for the isolated stack."
   type        = string
-  default     = "appi-jobfinder-prod"
+  default     = "appi-lowopscast-schedule"
 }
 
 variable "storage_account_name" {
-  description = "Existing storage account for function runtime and state."
+  description = "Optional storage account name. Leave empty to generate a unique name."
   type        = string
-  default     = "stjobfinderprodrandonix"
+  default     = ""
+}
+
+variable "storage_replication_type" {
+  description = "Storage replication type for the dedicated storage account."
+  type        = string
+  default     = "LRS"
 }
 
 variable "key_vault_name" {
-  description = "Existing Key Vault used for runtime secrets."
+  description = "Optional Key Vault name reserved for future use."
   type        = string
-  default     = "kv-jf-prod-randonix"
+  default     = ""
 }
 
 variable "function_app_name" {
-  description = "Function app name (new or existing managed in this stack)."
+  description = "Optional Function App name. Leave empty to generate an isolated unique name."
   type        = string
-  default     = "func-lowopscast-prod"
+  default     = ""
 }
 
 variable "function_python_version" {
