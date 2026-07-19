@@ -25,6 +25,12 @@ jobs:
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
       EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      RESOURCE_GROUP_NAME: ${{ vars.RESOURCE_GROUP_NAME }}
+      FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
+      APP_SERVICE_PLAN_NAME: ${{ vars.APP_SERVICE_PLAN_NAME }}
+      APPLICATION_INSIGHTS_NAME: ${{ vars.APPLICATION_INSIGHTS_NAME }}
+      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+      KEY_VAULT_NAME: ${{ vars.KEY_VAULT_NAME }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -92,8 +98,8 @@ jobs:
             exit 0
           fi
 
-          FUNC_APP_NAME="func-lowopscast-prod"
-          RG_NAME="rg-jsearch"
+          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
+          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
           SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
           RESOURCE_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}"
 
@@ -106,14 +112,37 @@ jobs:
 
       - name: Terraform apply
         run: |
+          RG_NAME="${RESOURCE_GROUP_NAME:-rg-jsearch}"
+          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-jobfinder-prod}"
+          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-jobfinder-prod}"
+          ST_NAME="${STORAGE_ACCOUNT_NAME:-stjobfinderprodrandonix}"
+          KV_NAME="${KEY_VAULT_NAME:-kv-jf-prod-randonix}"
+          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
+
           set +e
-          terraform apply -no-color -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" 2>&1 | tee ../ci-artifacts/terraform-apply.log
+          terraform apply -no-color -auto-approve \
+            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+            -var "resource_group_name=${RG_NAME}" \
+            -var "function_app_name=${FUNC_APP_NAME}" \
+            -var "app_service_plan_name=${PLAN_NAME}" \
+            -var "application_insights_name=${APPI_NAME}" \
+            -var "storage_account_name=${ST_NAME}" \
+            -var "key_vault_name=${KV_NAME}" \
+            2>&1 | tee ../ci-artifacts/terraform-apply.log
           TF_APPLY_EXIT=${PIPESTATUS[0]}
           echo "Terraform apply exit code: ${TF_APPLY_EXIT}"
 
           if [ "${TF_APPLY_EXIT}" -ne 0 ]; then
             terraform state list > ../ci-artifacts/terraform-state-list-on-failure.txt 2>&1 || true
-            terraform plan -no-color -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
+            terraform plan -no-color \
+              -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
+              -var "resource_group_name=${RG_NAME}" \
+              -var "function_app_name=${FUNC_APP_NAME}" \
+              -var "app_service_plan_name=${PLAN_NAME}" \
+              -var "application_insights_name=${APPI_NAME}" \
+              -var "storage_account_name=${ST_NAME}" \
+              -var "key_vault_name=${KV_NAME}" \
+              > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
           fi
 
           exit ${TF_APPLY_EXIT}
@@ -133,6 +162,7 @@ jobs:
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
     defaults:
       run:
         working-directory: src
@@ -195,8 +225,9 @@ jobs:
 
       - name: Publish Function App
         run: |
+          FUNC_APP_NAME="${FUNCTION_APP_NAME:-func-lowopscast-prod}"
           set +e
-          func azure functionapp publish func-lowopscast-prod --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
+          func azure functionapp publish "${FUNC_APP_NAME}" --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
           FUNC_EXIT=${PIPESTATUS[0]}
           echo "Function publish exit code: ${FUNC_EXIT}"
           exit ${FUNC_EXIT}
