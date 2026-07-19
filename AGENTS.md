@@ -10,6 +10,7 @@ This file defines mandatory behavior for AI agents working in this repository.
 
 ## Commit And Push Authorization
 - Agents are authorized to commit and push after implementing requested changes.
+- When the user asks for a fix in CI/CD or infrastructure, default behavior is to commit and push the relevant files in the same turn after validations pass.
 - Stage only relevant files and avoid unrelated modifications.
 - Use conventional commit messages and include a short validation summary in the final report.
 

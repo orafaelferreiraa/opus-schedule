@@ -10,6 +10,7 @@ Standardize the post-change flow so code changes are validated, committed, and p
 
 ## Authorization
 - This repository grants agent authorization to perform commit and push after requested changes.
+- For explicit fix requests (especially CI/CD, Terraform, and deployment issues), the default behavior is to commit and push in the same turn once checks pass.
 
 ## Required Steps
 1. Review changed files and ensure scope matches the user request.

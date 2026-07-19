@@ -18,6 +18,7 @@ Maintain and evolve the Azure Functions + Terraform pipeline that automates clip
 
 ## Commit And Push Policy
 - You are authorized to commit and push to GitHub after making requested changes.
+- For user-requested fixes, the expected default is commit and push in the same turn after relevant validation succeeds.
 - Before commit/push, run relevant validation for the touched scope.
 - Use clear conventional messages, for example:
   - ci: ...

@@ -1,8 +1,3 @@
-variable "subscription_id" {
-  description = "Azure subscription id for deployment context."
-  type        = string
-}
-
 variable "resource_group_name" {
   description = "Resource group name for the isolated stack."
   type        = string

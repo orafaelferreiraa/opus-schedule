@@ -93,55 +93,6 @@ jobs:
       - name: Terraform init
         run: terraform init
 
-      - name: Import existing resources into Terraform state (if needed)
-        run: |
-          RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
-          PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
-          PLAN_SKU="${APP_SERVICE_PLAN_SKU:-B1}"
-          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
-          ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
-          FUNC_APP_NAME="${FUNCTION_APP_NAME:-}"
-          SUB_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-
-          RG_ID="/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}"
-          PLAN_ID="${RG_ID}/providers/Microsoft.Web/serverfarms/${PLAN_NAME}"
-          APPI_ID="${RG_ID}/providers/Microsoft.Insights/components/${APPI_NAME}"
-
-          if ! terraform state show azurerm_resource_group.core >/dev/null 2>&1; then
-            if az group show --name "${RG_NAME}" >/dev/null 2>&1; then
-              echo "Importing existing Resource Group: ${RG_NAME}"
-              terraform import azurerm_resource_group.core "${RG_ID}" || true
-            fi
-          fi
-
-          if ! terraform state show azurerm_service_plan.core >/dev/null 2>&1; then
-            if az appservice plan show --resource-group "${RG_NAME}" --name "${PLAN_NAME}" >/dev/null 2>&1; then
-              echo "Importing existing App Service Plan: ${PLAN_NAME}"
-              terraform import azurerm_service_plan.core "${PLAN_ID}" || true
-            fi
-          fi
-
-          if ! terraform state show azurerm_application_insights.core >/dev/null 2>&1; then
-            if az monitor app-insights component show --app "${APPI_NAME}" --resource-group "${RG_NAME}" >/dev/null 2>&1; then
-              echo "Importing existing Application Insights: ${APPI_NAME}"
-              terraform import azurerm_application_insights.core "${APPI_ID}" || true
-            fi
-          fi
-
-          if [ -n "${ST_NAME}" ] && ! terraform state show azurerm_storage_account.core >/dev/null 2>&1; then
-            if az storage account show --resource-group "${RG_NAME}" --name "${ST_NAME}" >/dev/null 2>&1; then
-              echo "Importing existing Storage Account: ${ST_NAME}"
-              terraform import azurerm_storage_account.core "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Storage/storageAccounts/${ST_NAME}" || true
-            fi
-          fi
-
-          if [ -n "${FUNC_APP_NAME}" ] && ! terraform state show azurerm_linux_function_app.lowopscast >/dev/null 2>&1; then
-            if az functionapp show --resource-group "${RG_NAME}" --name "${FUNC_APP_NAME}" >/dev/null 2>&1; then
-              echo "Importing existing Function App: ${FUNC_APP_NAME}"
-              terraform import azurerm_linux_function_app.lowopscast "/subscriptions/${SUB_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}" || true
-            fi
-          fi
-
       - name: Terraform apply
         run: |
           RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
@@ -152,7 +103,6 @@ jobs:
           FUNC_APP_NAME="${FUNCTION_APP_NAME:-}"
 
           TF_ARGS=(
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             -var "resource_group_name=${RG_NAME}"
             -var "app_service_plan_name=${PLAN_NAME}"
             -var "app_service_plan_sku=${PLAN_SKU}"
@@ -263,6 +213,11 @@ jobs:
 
       - name: Publish Function App
         run: |
+          if [ -z "${DEPLOY_FUNCTION_APP_NAME}" ]; then
+            echo "Function app name is empty. terraform output did not produce function_app_name."
+            exit 1
+          fi
+
           set +e
           func azure functionapp publish "${DEPLOY_FUNCTION_APP_NAME}" --python 2>&1 | tee ../infra/ci-artifacts/function-publish.log
           FUNC_EXIT=${PIPESTATUS[0]}

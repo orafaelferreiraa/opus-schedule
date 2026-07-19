@@ -116,7 +116,7 @@ jobs:
           terraform providers > ../ci-artifacts/terraform-providers-plan.txt
 
       - name: Terraform fmt
-        run: terraform fmt -recursive
+        run: terraform fmt -check -recursive
 
       - name: Terraform init
         run: terraform init
@@ -134,7 +134,6 @@ jobs:
 
           set +e
           TF_ARGS=(
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
             -var "resource_group_name=${RG_NAME}"
             -var "app_service_plan_name=${PLAN_NAME}"
             -var "app_service_plan_sku=${PLAN_SKU}"
