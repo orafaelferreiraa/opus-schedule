@@ -605,11 +605,19 @@ def convert_clips_to_split(req: func.HttpRequest) -> func.HttpResponse:
                 collections = client.list_collections()
                 seen_ids: set[str] = set()
                 for col in collections:
-                    cid = str(col.get("id") or col.get("collectionId") or "")
+                    # /collections?q=mine pode devolver IDs (strings) ou objetos.
+                    if isinstance(col, str):
+                        cid = col
+                    elif isinstance(col, dict):
+                        cid = str(col.get("id") or col.get("collectionId") or col.get("_id") or "")
+                    else:
+                        continue
                     if not cid:
                         continue
                     sources.append(f"collection:{cid}")
                     for clip in client.get_clips_by_collection(cid):
+                        if not isinstance(clip, dict):
+                            continue
                         full_id = str(clip.get("id", ""))
                         if full_id and full_id not in seen_ids:
                             seen_ids.add(full_id)
