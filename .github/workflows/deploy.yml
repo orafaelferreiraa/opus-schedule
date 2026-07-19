@@ -146,6 +146,7 @@ jobs:
         run: |
           RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
           PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
+          PLAN_SKU="${APP_SERVICE_PLAN_SKU:-B1}"
           APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
           ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
           FUNC_APP_NAME="${FUNCTION_APP_NAME:-}"

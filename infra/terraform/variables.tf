@@ -25,6 +25,11 @@ variable "app_service_plan_sku" {
   description = "SKU for the dedicated Linux App Service plan."
   type        = string
   default     = "B1"
+
+  validation {
+    condition     = length(trimspace(var.app_service_plan_sku)) > 0
+    error_message = "app_service_plan_sku cannot be empty. Set a valid SKU (for example: B1, Y1, EP1, FC1)."
+  }
 }
 
 variable "application_insights_name" {
