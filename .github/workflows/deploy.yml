@@ -1,141 +1,38 @@
-name: ci-cd
+name: deploy
 
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
   workflow_dispatch:
+    inputs:
+      ref:
+        description: "Git ref to deploy (branch, tag, or SHA)"
+        required: false
+        default: "main"
 
 permissions:
   id-token: write
   contents: read
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: src
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
-
-      - name: Run tests
-        env:
-          PYTHONPATH: .
-        run: pytest -q tests/test_function_app.py tests/test_e2e_schedule_existing_clips.py tests/test_judge.py
-
-  terraform-plan:
-    runs-on: ubuntu-latest
-    needs: [test]
-    env:
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
-      TF_IN_AUTOMATION: "true"
-      TF_INPUT: "false"
-    defaults:
-      run:
-        working-directory: infra/terraform
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Azure Login (OIDC)
-        id: azure_login_oidc
-        continue-on-error: true
-        uses: azure/login@v3
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-          audience: api://AzureADTokenExchange
-
-      - name: Azure Login (Service Principal secret fallback)
-        id: azure_login_sp
-        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
-        continue-on-error: true
-        uses: azure/login@v3
-        with:
-          creds: ${{ env.AZURE_CREDENTIALS }}
-
-      - name: Fail when Azure auth is not configured
-        if: >-
-          steps.azure_login_oidc.outcome == 'failure' &&
-          (
-            env.AZURE_CREDENTIALS == '' ||
-            steps.azure_login_sp.outcome == 'failure'
-          )
-        run: |
-          echo "Azure authentication failed in terraform-plan."
-          echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
-          exit 1
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
-
-      - name: Create diagnostics folder
-        run: mkdir -p ../ci-artifacts
-
-      - name: Azure context diagnostics
-        run: |
-          az version > ../ci-artifacts/az-version-plan.json || true
-          az account show > ../ci-artifacts/az-account-plan.json || true
-
-      - name: Terraform diagnostics
-        run: |
-          terraform version > ../ci-artifacts/terraform-version-plan.txt
-          terraform providers > ../ci-artifacts/terraform-providers-plan.txt
-
-      - name: Terraform fmt
-        run: terraform fmt -recursive
-
-      - name: Terraform init
-        run: terraform init
-
-      - name: Terraform validate
-        run: terraform validate
-
-      - name: Terraform plan
-        run: |
-          set +e
-          terraform plan -no-color -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" 2>&1 | tee ../ci-artifacts/terraform-plan.log
-          TF_PLAN_EXIT=${PIPESTATUS[0]}
-          echo "Terraform plan exit code: ${TF_PLAN_EXIT}"
-          exit ${TF_PLAN_EXIT}
-
-      - name: Upload plan diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: terraform-plan-diagnostics-${{ github.run_id }}
-          path: infra/ci-artifacts
-          if-no-files-found: warn
-
   terraform-apply:
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    needs: [terraform-plan]
+    timeout-minutes: 30
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
       TF_IN_AUTOMATION: "true"
       TF_INPUT: "false"
+      EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     defaults:
       run:
         working-directory: infra/terraform
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Azure Login (OIDC)
         id: azure_login_oidc
@@ -167,21 +64,21 @@ jobs:
           echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
           exit 1
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
-
       - name: Create diagnostics folder
         run: mkdir -p ../ci-artifacts
 
-      - name: Azure context diagnostics
+      - name: Assert subscription context
         run: |
-          az version > ../ci-artifacts/az-version-apply.json || true
-          az account show > ../ci-artifacts/az-account-apply.json || true
+          CURRENT_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+          echo "Expected subscription: ${EXPECTED_SUBSCRIPTION_ID}"
+          echo "Current subscription:  ${CURRENT_SUBSCRIPTION_ID}"
+          if [ "${CURRENT_SUBSCRIPTION_ID}" != "${EXPECTED_SUBSCRIPTION_ID}" ]; then
+            echo "Azure login landed in the wrong subscription context."
+            exit 1
+          fi
 
-      - name: Terraform diagnostics
-        run: |
-          terraform version > ../ci-artifacts/terraform-version-apply.txt
-          terraform providers > ../ci-artifacts/terraform-providers-apply.txt
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
 
       - name: Terraform init
         run: terraform init
@@ -215,15 +112,8 @@ jobs:
           echo "Terraform apply exit code: ${TF_APPLY_EXIT}"
 
           if [ "${TF_APPLY_EXIT}" -ne 0 ]; then
-            echo "Collecting additional failure diagnostics..."
             terraform state list > ../ci-artifacts/terraform-state-list-on-failure.txt 2>&1 || true
             terraform plan -no-color -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" > ../ci-artifacts/terraform-plan-after-apply-failure.log 2>&1 || true
-
-            FUNC_APP_NAME="func-lowopscast-prod"
-            RG_NAME="rg-jsearch"
-            SUBSCRIPTION_ID="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-            RESOURCE_ID="/subscriptions/${SUBSCRIPTION_ID}/resourceGroups/${RG_NAME}/providers/Microsoft.Web/sites/${FUNC_APP_NAME}"
-            az resource show --ids "${RESOURCE_ID}" > ../ci-artifacts/function-app-resource-on-failure.json 2>&1 || true
           fi
 
           exit ${TF_APPLY_EXIT}
@@ -237,17 +127,20 @@ jobs:
           if-no-files-found: warn
 
   deploy-function:
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     needs: [terraform-apply]
     env:
       AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
+      EXPECTED_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
     defaults:
       run:
         working-directory: src
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.ref }}
 
       - name: Azure Login (OIDC)
         id: azure_login_oidc
@@ -278,6 +171,16 @@ jobs:
           echo "Azure authentication failed in deploy-function."
           echo "Configure OIDC federated credential in Entra ID or set AZURE_CREDENTIALS secret."
           exit 1
+
+      - name: Assert subscription context
+        run: |
+          CURRENT_SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
+          echo "Expected subscription: ${EXPECTED_SUBSCRIPTION_ID}"
+          echo "Current subscription:  ${CURRENT_SUBSCRIPTION_ID}"
+          if [ "${CURRENT_SUBSCRIPTION_ID}" != "${EXPECTED_SUBSCRIPTION_ID}" ]; then
+            echo "Azure login landed in the wrong subscription context."
+            exit 1
+          fi
 
       - name: Setup Python
         uses: actions/setup-python@v6
