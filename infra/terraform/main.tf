@@ -112,7 +112,7 @@ resource "azurerm_function_app_flex_consumption" "lowopscast" {
     JUDGE_AZURE_OPENAI_ENDPOINT     = data.azurerm_cognitive_account.shared_foundry.endpoint
     JUDGE_MODEL_DEPLOYMENT_PRIMARY  = var.judge_primary_model
     JUDGE_MODEL_DEPLOYMENT_FALLBACK = var.judge_fallback_model
-    JUDGE_API_VERSION               = "2025-01-01-preview"
+    JUDGE_API_VERSION               = "2024-12-01-preview"
     JUDGE_THRESHOLD                 = "70"
     JUDGE_INCLUDE_REVIEW_IN_DRY_RUN = "true"
     JUDGE_TIMEOUT_MS                = "12000"
@@ -124,4 +124,12 @@ resource "azurerm_function_app_flex_consumption" "lowopscast" {
   }
 
   tags = local.common_tags
+}
+
+# Permite ao Judge (modo hybrid / analyze-library use_llm) chamar o gpt-5-mini
+# do Foundry compartilhado via managed identity.
+resource "azurerm_role_assignment" "function_foundry" {
+  scope                = data.azurerm_cognitive_account.shared_foundry.id
+  role_definition_name = "Cognitive Services OpenAI User"
+  principal_id         = azurerm_function_app_flex_consumption.lowopscast.identity[0].principal_id
 }

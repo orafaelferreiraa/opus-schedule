@@ -541,14 +541,16 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
 def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
     """Relatório de qualidade dos cortes da biblioteca (quais valem postar).
 
-    Usa os sinais nativos da OpusClip (score + judgeResult.hookScore/hookComment)
-    e regras de duração — sem LLM, independente do layout. Body JSON (opcional):
+    Combina sinais nativos da OpusClip (raw/hook/coherence/connection), limpeza da
+    fala (pausas/repetições/gaguejo/filler da transcrição) e, opcionalmente, o LLM
+    gpt-5-mini. `recommended` = passou nas regras E (se use_llm) o LLM aprovou.
+    Independente de layout. Body JSON (tudo opcional):
     {
-        "project_ids": ["P..."],        # default: todos (menos os vídeos pessoais)
+        "project_ids": ["P..."],          # default: todos (menos os vídeos pessoais)
         "exclude_project_ids": ["P..."],
-        "min_score": 85, "min_hook": 6,
-        "min_duration_s": 15, "max_duration_s": 100,
-        "top_n_per_project": 5           # limita cortes retornados por projeto
+        "use_llm": true,                  # roda o gpt-5-mini em cada corte
+        "rules": { "min_raw": 35, "min_hook": 9, "max_pauses_per_min": 6, ... },
+        "top_n_per_project": 5            # limita cortes retornados por projeto
     }
     """
     started_at = time.perf_counter()
@@ -569,10 +571,9 @@ def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
                 OpusClient(),
                 project_ids=body.get("project_ids") or None,
                 exclude_project_ids=body.get("exclude_project_ids"),
-                min_score=float(body.get("min_score", 85)),
-                min_hook=float(body.get("min_hook", 6)),
-                min_dur_s=int(body.get("min_duration_s", 15)),
-                max_dur_s=int(body.get("max_duration_s", 100)),
+                rules=body.get("rules") or None,
+                use_llm=bool(body.get("use_llm", False)),
+                llm_scope=str(body.get("llm_scope", "recommended")),
                 top_n_per_project=body.get("top_n_per_project"),
             )
             mark_ok(
@@ -581,6 +582,7 @@ def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
                 lowopscast_projects_analyzed=report["projects_analyzed"],
                 lowopscast_total_clips=report["total_clips"],
                 lowopscast_recommended_total=report["recommended_total"],
+                lowopscast_llm_used=report["llm_used"],
             )
             return func.HttpResponse(json.dumps(report, default=str), status_code=200, mimetype="application/json")
         except Exception as exc:
