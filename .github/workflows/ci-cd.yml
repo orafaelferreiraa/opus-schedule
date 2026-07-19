@@ -19,10 +19,10 @@ jobs:
         working-directory: src
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
@@ -40,22 +40,40 @@ jobs:
   terraform-plan:
     runs-on: ubuntu-latest
     needs: [test]
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     defaults:
       run:
         working-directory: infra/terraform
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        id: azure_login_oidc
+        continue-on-error: true
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Azure Login (Service Principal secret fallback)
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v3
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      - name: Fail when Azure auth is not configured
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        run: |
+          echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
+          echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
+          echo "or set secret AZURE_CREDENTIALS with Service Principal JSON."
+          exit 1
+
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
 
       - name: Terraform fmt
         run: terraform fmt -check
@@ -73,22 +91,40 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [terraform-plan]
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     defaults:
       run:
         working-directory: infra/terraform
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        id: azure_login_oidc
+        continue-on-error: true
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Azure Login (Service Principal secret fallback)
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v3
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      - name: Fail when Azure auth is not configured
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        run: |
+          echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
+          echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
+          echo "or set secret AZURE_CREDENTIALS with Service Principal JSON."
+          exit 1
+
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
 
       - name: Terraform init
         run: terraform init
@@ -100,22 +136,40 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     needs: [terraform-apply]
+    env:
+      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS }}
     defaults:
       run:
         working-directory: src
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Azure Login (OIDC)
-        uses: azure/login@v2
+        id: azure_login_oidc
+        continue-on-error: true
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Azure Login (Service Principal secret fallback)
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS != ''
+        uses: azure/login@v3
+        with:
+          creds: ${{ env.AZURE_CREDENTIALS }}
+
+      - name: Fail when Azure auth is not configured
+        if: steps.azure_login_oidc.outcome == 'failure' && env.AZURE_CREDENTIALS == ''
+        run: |
+          echo "OIDC login failed and AZURE_CREDENTIALS is not configured."
+          echo "Configure a federated credential for this repo/branch in Microsoft Entra ID"
+          echo "or set secret AZURE_CREDENTIALS with Service Principal JSON."
+          exit 1
+
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.13"
 
