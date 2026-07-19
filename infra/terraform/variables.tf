@@ -123,7 +123,7 @@ variable "state_table_name" {
 variable "notification_email_to" {
   description = "E-mail de destino do resumo de agendamentos."
   type        = string
-  default     = ""
+  default     = "rafael_low@hotmail.com"
 }
 
 variable "notification_email_from" {
