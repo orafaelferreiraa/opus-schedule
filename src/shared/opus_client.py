@@ -111,12 +111,17 @@ class OpusClient:
     # ------------------------------------------------------------------
 
     def list_collections(self) -> list[dict]:
-        """Lista as coleções da conta (GET /api/collections?q=mine).
-
-        É o único ponto de enumeração disponível na API (não há listagem de
-        projetos); permite varrer todos os cortes coleção a coleção.
-        """
+        """Lista as coleções da conta (GET /api/collections?q=mine)."""
         return _extract_list(self._get("/collections", params={"q": "mine"}))
+
+    def list_projects(self) -> list[dict]:
+        """Lista todos os projetos da conta (GET /api/clip-projects?q=mine).
+
+        Endpoint não-documentado no OpenAPI (que só lista POST e GET-by-id), mas
+        funciona e devolve o envelope {data:{list:[...]}}. Cada item traz
+        `projectId`, `createdAt`, `updatedAt` e `sourceInfo.title`.
+        """
+        return _extract_list(self._get("/clip-projects", params={"q": "mine"}))
 
     # ------------------------------------------------------------------
     # Clips
