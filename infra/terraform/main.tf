@@ -35,7 +35,7 @@ resource "azurerm_linux_function_app" "lowopscast" {
 
   site_config {
     application_stack {
-      python_version = "3.13"
+      python_version = var.function_python_version
     }
   }
 

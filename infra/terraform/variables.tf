@@ -45,6 +45,12 @@ variable "function_app_name" {
   default     = "func-lowopscast-prod"
 }
 
+variable "function_python_version" {
+  description = "Python runtime version for Azure Functions application stack."
+  type        = string
+  default     = "3.12"
+}
+
 variable "judge_primary_model" {
   description = "Primary judge deployment name in Foundry/Azure OpenAI."
   type        = string
