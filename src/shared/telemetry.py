@@ -48,6 +48,11 @@ schedules_failed_counter = meter.create_counter(
     unit="1",
     description="Quantidade de falhas de agendamento",
 )
+schedules_skipped_counter = meter.create_counter(
+    name="lowopscast.schedules.skipped",
+    unit="1",
+    description="Agendamentos pulados por ja existirem (idempotencia)",
+)
 judge_clips_total_counter = meter.create_counter(
     name="lowopscast.judge.clips.total",
     unit="1",

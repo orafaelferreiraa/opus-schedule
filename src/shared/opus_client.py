@@ -156,9 +156,13 @@ class OpusClient:
     # ------------------------------------------------------------------
 
     def create_schedules(self, plan: dict) -> list[dict]:
-        """
-        Cria os agendamentos para cada (clip, rede, horario) no plano.
+        """Cria os agendamentos para cada (clip, rede, horario) no plano.
 
+        Retorna uma lista de resultados por item, cada um no formato
+        ``{"ok": bool, "clipId": str, "network": str, ...}``. Falhas individuais
+        não interrompem o lote — cada erro vira um resultado com ``ok=False``.
+        """
+        results: list[dict] = []
         with tracer.start_as_current_span("opus.create_schedules_batch") as span:
             span.set_attribute("lowopscast_networks_count", len(plan))
             for network, items in plan.items():
@@ -171,49 +175,38 @@ class OpusClient:
                 lowopscast_scheduled_count=len([r for r in results if r.get("ok")]),
                 lowopscast_failed_count=len([r for r in results if not r.get("ok")]),
             )
-            ...
-          ],
-          ...
-        }
-        """
-        results: list[dict] = []
-        for network, items in plan.items():
-            for item in items:
-                result = self._schedule_one(network, item)
-                results.append(result)
-                time.sleep(_SCHEDULER_RATE_LIMIT_S)  # respeitar 1 req/s
         return results
 
     def _schedule_one(self, network: str, item: dict) -> dict:
-        payload = {
-            "projectId": item["projectId"],
-            "clipId": item["clipId"],
-            "postAccountId": item["postAccountId"],
-            "postDetail": {
-                "title": item.get("title", "")[:100],
-                "mediaType": "video",
-                "custom": {
-                    "description": item.get("description", ""),
-                },
-            },
-            "publishAt": item["publishAt"],
-        }
-        if item.get("subAccountId"):
-            payload["subAccountId"] = item["subAccountId"]
-
         started_at = perf_counter()
 
         with tracer.start_as_current_span("opus.publish_schedule") as span:
             op_attrs = attrs(
                 lowopscast_network=network,
-                lowopscast_clip_id=item["clipId"],
-                lowopscast_project_id=item["projectId"],
-                lowopscast_publish_at=item["publishAt"],
+                lowopscast_clip_id=item.get("clipId", ""),
+                lowopscast_project_id=item.get("projectId", ""),
+                lowopscast_publish_at=item.get("publishAt", ""),
             )
             for key, value in op_attrs.items():
                 span.set_attribute(key, value)
 
             try:
+                payload = {
+                    "projectId": item["projectId"],
+                    "clipId": item["clipId"],
+                    "postAccountId": item["postAccountId"],
+                    "postDetail": {
+                        "title": item.get("title", "")[:100],
+                        "mediaType": "video",
+                        "custom": {
+                            "description": item.get("description", ""),
+                        },
+                    },
+                    "publishAt": item["publishAt"],
+                }
+                if item.get("subAccountId"):
+                    payload["subAccountId"] = item["subAccountId"]
+
                 data = self._post("/publish-schedules", json=payload)
                 schedule_id = data.get("data", {}).get("scheduleId", "")
                 elapsed_ms = round((perf_counter() - started_at) * 1000, 2)
@@ -236,6 +229,7 @@ class OpusClient:
                 return {
                     "ok": True,
                     "clipId": item["clipId"],
+                    "projectId": item.get("projectId", ""),
                     "network": network,
                     "scheduleId": schedule_id,
                     "publishAt": item["publishAt"],
@@ -262,7 +256,29 @@ class OpusClient:
                 )
                 return {
                     "ok": False,
-                    "clipId": item["clipId"],
+                    "clipId": item.get("clipId", ""),
+                    "projectId": item.get("projectId", ""),
                     "network": network,
                     "error": exc.response.text,
+                }
+            except Exception as exc:  # noqa: BLE001 - registrar falha e seguir o lote
+                elapsed_ms = round((perf_counter() - started_at) * 1000, 2)
+                publish_latency_ms.record(elapsed_ms, op_attrs)
+                logger.error(
+                    "Falha ao agendar clip (erro nao-HTTP)",
+                    extra={
+                        "custom_dimensions": {
+                            **op_attrs,
+                            "lowopscast_publish_latency_ms": elapsed_ms,
+                            "lowopscast_error": str(exc)[:2048],
+                        }
+                    },
+                )
+                mark_error(span, exc, lowopscast_publish_latency_ms=elapsed_ms)
+                return {
+                    "ok": False,
+                    "clipId": item.get("clipId", ""),
+                    "projectId": item.get("projectId", ""),
+                    "network": network,
+                    "error": str(exc),
                 }

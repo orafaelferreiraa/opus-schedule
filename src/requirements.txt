@@ -3,6 +3,5 @@ httpx
 azure-data-tables
 azure-communication-email
 azure-identity
-azure-keyvault-secrets
 azure-monitor-opentelemetry
 opentelemetry-instrumentation-httpx

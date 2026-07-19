@@ -1,167 +1,133 @@
 variable "resource_group_name" {
-  description = "Resource group name for the isolated stack."
+  description = "Resource group dedicado deste stack (recursos próprios)."
   type        = string
   default     = "rg-lowopscast-schedule"
 }
 
 variable "location" {
-  description = "Azure region."
+  description = "Região Azure. Co-localizada com os recursos compartilhados (East US 2)."
   type        = string
-  default     = "eastus"
+  default     = "eastus2"
 }
 
 variable "app_service_plan_name" {
-  description = "App Service plan name for the isolated stack."
+  description = "Nome do App Service Plan dedicado."
   type        = string
   default     = "plan-lowopscast-schedule"
 }
 
 variable "app_service_plan_sku" {
-  description = "SKU for the dedicated Linux App Service plan."
+  description = "SKU do plano. FC1 = Flex Consumption (~$0 ocioso). B1 = dedicado (fallback confiável se faltar quota FC1)."
   type        = string
-  default     = "B1"
+  default     = "FC1"
 
   validation {
     condition     = length(trimspace(var.app_service_plan_sku)) > 0
-    error_message = "app_service_plan_sku cannot be empty. Set a valid SKU (for example: B1, Y1, EP1, FC1)."
+    error_message = "app_service_plan_sku não pode ser vazio (ex.: FC1, B1, EP1)."
   }
 }
 
-variable "application_insights_name" {
-  description = "Application Insights name for the isolated stack."
-  type        = string
-  default     = "appi-lowopscast-schedule"
-}
-
-variable "storage_account_name" {
-  description = "Optional storage account name. Leave empty to generate a unique name."
-  type        = string
-  default     = ""
-}
-
-variable "storage_replication_type" {
-  description = "Storage replication type for the dedicated storage account."
-  type        = string
-  default     = "LRS"
-}
-
-variable "key_vault_name" {
-  description = "Optional Key Vault name. Leave empty to generate a unique name."
-  type        = string
-  default     = ""
-}
-
 variable "function_app_name" {
-  description = "Optional Function App name. Leave empty to generate an isolated unique name."
+  description = "Nome opcional do Function App. Vazio gera um nome único isolado."
   type        = string
   default     = ""
 }
 
 variable "function_python_version" {
-  description = "Python runtime version for Azure Functions application stack."
+  description = "Versão do runtime Python do Function App."
   type        = string
-  default     = "3.12"
+  default     = "3.13"
 }
 
-variable "judge_primary_model" {
-  description = "Primary judge deployment name in Foundry/Azure OpenAI."
+# ---------------------------------------------------------------------------
+# Recursos compartilhados reutilizados (rg-jsearch)
+# ---------------------------------------------------------------------------
+variable "shared_resource_group_name" {
+  description = "Resource group que hospeda os recursos compartilhados reutilizados."
   type        = string
-  default     = "gpt-5.6-sol"
+  default     = "rg-jsearch"
 }
 
-variable "judge_fallback_model" {
-  description = "Fallback judge deployment name in Foundry/Azure OpenAI."
+variable "shared_storage_account_name" {
+  description = "Storage account compartilhado (runtime da função + tabela de idempotência)."
   type        = string
-  default     = "gpt-5.4-mini"
+  default     = "stjobfinderprodrandonix"
 }
 
-variable "foundry_account_name" {
-  description = "Optional Azure OpenAI/Foundry account name. Leave empty to generate a unique name."
+variable "shared_app_insights_name" {
+  description = "Application Insights compartilhado para telemetria."
   type        = string
-  default     = ""
+  default     = "appi-jobfinder-prod"
 }
 
+variable "shared_acs_name" {
+  description = "Azure Communication Services compartilhado (e-mail) com domínio verificado."
+  type        = string
+  default     = "acs-jobfinder-prod"
+}
+
+variable "shared_foundry_name" {
+  description = "Conta Azure OpenAI/Foundry compartilhada usada pelo Judge (modo hybrid)."
+  type        = string
+  default     = "aif-jobfinder-prod-randonix"
+}
+
+# ---------------------------------------------------------------------------
+# Judge (dormente por padrão: JUDGE_MODE=rules_only)
+# ---------------------------------------------------------------------------
 variable "judge_auth_mode" {
-  description = "Judge auth mode: managed_identity or api_key."
+  description = "Modo de auth do Judge no modo hybrid: managed_identity ou api_key."
   type        = string
   default     = "managed_identity"
 
   validation {
     condition     = contains(["managed_identity", "api_key"], var.judge_auth_mode)
-    error_message = "judge_auth_mode must be one of: managed_identity, api_key."
+    error_message = "judge_auth_mode deve ser: managed_identity ou api_key."
   }
 }
 
-variable "judge_primary_model_name" {
-  description = "Primary model name from Azure OpenAI catalog."
+variable "judge_primary_model" {
+  description = "Deployment primário no Foundry compartilhado (reutiliza o existente)."
   type        = string
-  default     = "gpt-5"
+  default     = "gpt-5-mini"
 }
 
-variable "judge_primary_model_version" {
-  description = "Primary model version from Azure OpenAI catalog."
+variable "judge_fallback_model" {
+  description = "Deployment de fallback no Foundry compartilhado."
   type        = string
-  default     = "2025-08-07"
+  default     = "gpt-5-mini"
 }
 
-variable "judge_primary_sku_name" {
-  description = "Primary deployment SKU name."
-  type        = string
-  default     = "GlobalStandard"
-}
-
-variable "judge_primary_sku_capacity" {
-  description = "Primary deployment SKU capacity."
-  type        = number
-  default     = 50
-}
-
-variable "judge_fallback_model_name" {
-  description = "Fallback model name from Azure OpenAI catalog."
-  type        = string
-  default     = "gpt-4.1-mini"
-}
-
-variable "judge_fallback_model_version" {
-  description = "Fallback model version from Azure OpenAI catalog."
-  type        = string
-  default     = "2025-04-14"
-}
-
-variable "judge_fallback_sku_name" {
-  description = "Fallback deployment SKU name."
-  type        = string
-  default     = "GlobalStandard"
-}
-
-variable "judge_fallback_sku_capacity" {
-  description = "Fallback deployment SKU capacity."
-  type        = number
-  default     = 20
-}
-
+# ---------------------------------------------------------------------------
+# Segredos / configuração de runtime
+# ---------------------------------------------------------------------------
 variable "opusclip_api_key" {
-  description = "OpusClip API key stored in Key Vault and referenced by Function App."
+  description = "API key da OpusClip (via GitHub secret / TF_VAR)."
   type        = string
   default     = ""
   sensitive   = true
 }
 
-variable "acs_connection_string" {
-  description = "ACS Email connection string stored in Key Vault."
+variable "opusclip_org_id" {
+  description = "Org id opcional da OpusClip."
   type        = string
   default     = ""
-  sensitive   = true
+}
+
+variable "state_table_name" {
+  description = "Nome da tabela de idempotência no storage compartilhado."
+  type        = string
+  default     = "lowopscaststate"
 }
 
 variable "notification_email_to" {
-  description = "Target e-mail for schedule summary notifications."
+  description = "E-mail de destino do resumo de agendamentos."
   type        = string
   default     = ""
 }
 
 variable "notification_email_from" {
-  description = "Source e-mail for schedule summary notifications."
+  description = "E-mail remetente (domínio verificado no ACS compartilhado)."
   type        = string
   default     = "noreply@orafaelferreira.com"
 }

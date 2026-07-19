@@ -6,7 +6,7 @@ Maintain and evolve the Azure Functions + Terraform pipeline that automates clip
 ## Project Snapshot
 - Runtime: Python 3.13 in Azure Functions.
 - IaC: Terraform under infra/terraform.
-- CI/CD: .github/workflows/ci-cd.yml with jobs test, terraform-plan, terraform-apply, deploy-function.
+- CI/CD: .github/workflows/ci-validate.yml (jobs test, terraform-plan) and .github/workflows/deploy.yml (jobs terraform-apply, deploy-function). deploy runs on ci-validate success on main, or manual dispatch.
 - Cloud auth in CI: Azure OIDC with azure/login and audience api://AzureADTokenExchange.
 
 ## Working Agreement

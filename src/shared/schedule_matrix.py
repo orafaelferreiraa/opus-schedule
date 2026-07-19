@@ -84,9 +84,8 @@ def build_schedule_plan(clips: list[dict], accounts: list[dict]) -> dict[str, li
         gap = cfg.get("gap_hours", 24)
         days_only = cfg.get("days_only", [])
 
-        # Selecionar top-N clips (OpusClip não retorna score direto na API;
-        # ordenamos por duração decrescente como proxy de qualidade)
-        selected = sorted(clips, key=lambda c: c.get("durationMs", 0), reverse=True)[:top_n]
+        # Selecionar top-N clips por score de viralidade (proxy: durationMs)
+        selected = sorted(clips, key=_clip_score, reverse=True)[:top_n]
 
         items: list[dict] = []
         publish_dt = _next_slot(now_brt, hours, days_only)
@@ -107,7 +106,7 @@ def build_schedule_plan(clips: list[dict], accounts: list[dict]) -> dict[str, li
                 "publishAt": publish_dt.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000Z"),
                 "postAccountId": account.get("postAccountId") or account.get("id", ""),
                 "subAccountId": account.get("subAccountId"),
-                "title": _build_title(clip, platform),
+                "title": _build_title(clip),
                 "description": _build_description(clip),
             }
             items.append(item)
@@ -121,6 +120,26 @@ def build_schedule_plan(clips: list[dict], accounts: list[dict]) -> dict[str, li
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+# Campos de score de viralidade que a OpusClip pode retornar. O schema público
+# do endpoint /exportable-clips não documenta um score, mas o dashboard o expõe
+# e a resposta pode trazê-lo sob um destes nomes — sondamos todos e caímos para
+# durationMs (proxy de qualidade) quando nenhum estiver presente.
+_VIRALITY_FIELDS = ("viralityScore", "virality_score", "viralScore", "score")
+
+
+def _clip_score(clip: dict) -> tuple[int, float]:
+    """Chave de ordenação: (tem_score, valor).
+
+    Clips com score de viralidade numérico vêm primeiro (ordenados pelo score);
+    os demais caem para durationMs como proxy. Usado com ``sorted(reverse=True)``.
+    """
+    for field in _VIRALITY_FIELDS:
+        val = clip.get(field)
+        if isinstance(val, (int, float)) and not isinstance(val, bool):
+            return (1, float(val))
+    return (0, float(clip.get("durationMs", 0) or 0))
+
 
 def _next_slot(from_dt: datetime, hours_brt: list[int], days_only: list[int]) -> datetime:
     """Encontra o próximo slot de horário válido a partir de from_dt (em BRT)."""
@@ -137,7 +156,7 @@ def _next_slot(from_dt: datetime, hours_brt: list[int], days_only: list[int]) ->
     return from_dt + timedelta(hours=24)  # fallback
 
 
-def _build_title(clip: dict, platform: str) -> str:
+def _build_title(clip: dict) -> str:
     title = clip.get("title", "").strip()
     if not title:
         title = "LowOpsCast"

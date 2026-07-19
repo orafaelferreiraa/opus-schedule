@@ -266,7 +266,6 @@ def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deploymen
 
     attempts = max(1, settings.max_retries + 1)
     for attempt in range(attempts):
-        started = time.perf_counter()
         try:
             with httpx.Client(timeout=timeout_s) as client:
                 resp = client.post(url, headers=headers, json=body)
@@ -283,8 +282,6 @@ def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deploymen
                 raise
             # backoff curto para nao aumentar muito a latencia da function
             time.sleep(0.35 * (attempt + 1))
-        finally:
-            _ = round((time.perf_counter() - started) * 1000, 2)
 
     raise RuntimeError("judge_llm_unreachable")
 

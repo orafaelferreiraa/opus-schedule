@@ -1,0 +1,18 @@
+# Normalize line endings to avoid CRLF churn (OneDrive/WSL on Windows filesystem).
+* text=auto eol=lf
+
+# Explicitly LF for source and config.
+*.py       text eol=lf
+*.tf       text eol=lf
+*.yml      text eol=lf
+*.yaml     text eol=lf
+*.json     text eol=lf
+*.md       text eol=lf
+*.sh       text eol=lf
+*.txt      text eol=lf
+
+# Binary files: never touch.
+*.png binary
+*.jpg binary
+*.ico binary
+*.zip binary

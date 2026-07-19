@@ -1,0 +1,10 @@
+# Terraform local artifacts (provider cache, state, plans, tfvars).
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+*.auto.tfvars
+override.tf
+override.tf.json
+# Keep .terraform.lock.hcl committed for reproducible provider versions.

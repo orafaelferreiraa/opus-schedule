@@ -13,6 +13,7 @@ from shared.judge import JudgeSettings, judge_clips, summarize_judge
 from shared.opus_client import OpusClient
 from shared.schedule_matrix import build_schedule_plan
 from shared.email_notify import send_summary_email
+from shared.state_store import ScheduleStateStore
 from shared.telemetry import (
     attrs,
     clips_found_counter,
@@ -30,6 +31,7 @@ from shared.telemetry import (
     schedules_created_counter,
     schedules_failed_counter,
     schedules_planned_counter,
+    schedules_skipped_counter,
     tracer,
 )
 
@@ -327,6 +329,22 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                     lowopscast_network_count=len(plan),
                     lowopscast_schedules_planned=total_schedules,
                 )
+
+            # Idempotência: remove do plano itens já agendados em execuções anteriores.
+            state_store = ScheduleStateStore()
+            skipped_duplicates = 0
+            if state_store.enabled:
+                with tracer.start_as_current_span("lowopscast.dedupe_plan") as child_span:
+                    plan, skipped_duplicates = state_store.filter_plan(plan)
+                    total_schedules = sum(len(v) for v in plan.values())
+                    if skipped_duplicates:
+                        schedules_skipped_counter.add(skipped_duplicates, request_attrs)
+                    mark_ok(
+                        child_span,
+                        lowopscast_skipped_duplicates=skipped_duplicates,
+                        lowopscast_schedules_after_dedupe=total_schedules,
+                    )
+
             logger.info(
                 "Plano gerado",
                 extra={
@@ -334,6 +352,7 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                         **request_attrs,
                         "lowopscast_network_count": len(plan),
                         "lowopscast_schedules_planned": total_schedules,
+                        "lowopscast_skipped_duplicates": skipped_duplicates,
                     }
                 },
             )
@@ -367,6 +386,7 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                         {
                             "dry_run": True,
                             "total_clips": len(clips),
+                            "skipped_duplicates": skipped_duplicates,
                             "schedule_plan": plan,
                             "judge": {
                                 "mode": judge_settings.mode,
@@ -436,6 +456,18 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                     lowopscast_scheduled_count=len(scheduled),
                     lowopscast_failed_count=len(failed),
                 )
+
+            # Persiste os agendamentos criados para deduplicar execuções futuras.
+            if state_store.enabled and scheduled:
+                for result in scheduled:
+                    state_store.mark_scheduled(
+                        project_id=str(result.get("projectId", "")),
+                        clip_id=str(result.get("clipId", "")),
+                        network=str(result.get("network", "")),
+                        publish_at=str(result.get("publishAt", "")),
+                        schedule_id=str(result.get("scheduleId", "")),
+                    )
+
             logger.info(
                 "Agendamentos processados",
                 extra={
@@ -472,6 +504,7 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                 json.dumps(
                     {
                         "total_clips": len(clips),
+                        "skipped_duplicates": skipped_duplicates,
                         "clips_updated_for_split_layout": len(split_layout_updates),
                         "updated_clip_ids": [item.get("id") for item in split_layout_updates],
                         "scheduled": len(scheduled),

@@ -3,7 +3,7 @@
 import pytest
 from datetime import datetime
 from zoneinfo import ZoneInfo
-from shared.schedule_matrix import build_schedule_plan, _next_slot, NETWORK_CONFIG
+from shared.schedule_matrix import build_schedule_plan, _next_slot, _clip_score, NETWORK_CONFIG
 
 BRT = ZoneInfo("America/Sao_Paulo")
 
@@ -115,3 +115,37 @@ def test_next_slot_chooses_correct_hour():
     from_dt = datetime(2026, 7, 21, 10, 0, tzinfo=BRT)  # terça, 10h
     slot = _next_slot(from_dt, [9, 15], days_only=[])
     assert slot.hour == 15, f"Hora esperada 15, obtida {slot.hour}"
+
+
+def test_clip_score_prefers_virality_over_duration():
+    scored = {"id": "P.c1", "durationMs": 1000, "viralityScore": 90}
+    long_unscored = {"id": "P.c2", "durationMs": 999999}
+    # Um clip com score de viralidade sempre vence um sem score, independente da duração.
+    assert _clip_score(scored) > _clip_score(long_unscored)
+
+
+def test_clip_score_ignores_boolean_field():
+    # bool é subclasse de int; não deve ser tratado como score numérico.
+    assert _clip_score({"id": "x", "viralityScore": True, "durationMs": 5000}) == (0, 5000.0)
+
+
+def test_ranking_orders_by_virality_score():
+    clips = [
+        {"id": "P.low", "projectId": "P", "durationMs": 90000, "viralityScore": 10, "title": "L"},
+        {"id": "P.high", "projectId": "P", "durationMs": 10000, "viralityScore": 95, "title": "H"},
+    ]
+    accounts = [{"platform": "YOUTUBE", "postAccountId": "y", "id": "y"}]
+    plan = build_schedule_plan(clips, accounts)
+    order = [item["clipId"] for item in plan["YOUTUBE"]]
+    assert order == ["high", "low"], f"Esperado maior score primeiro, obtido {order}"
+
+
+def test_ranking_falls_back_to_duration_without_score():
+    clips = [
+        {"id": "P.short", "projectId": "P", "durationMs": 10000, "title": "S"},
+        {"id": "P.long", "projectId": "P", "durationMs": 90000, "title": "L"},
+    ]
+    accounts = [{"platform": "YOUTUBE", "postAccountId": "y", "id": "y"}]
+    plan = build_schedule_plan(clips, accounts)
+    order = [item["clipId"] for item in plan["YOUTUBE"]]
+    assert order == ["long", "short"], f"Sem score, maior duração primeiro; obtido {order}"

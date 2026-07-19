@@ -39,8 +39,11 @@ jobs:
       FUNCTION_APP_NAME: ${{ vars.FUNCTION_APP_NAME }}
       APP_SERVICE_PLAN_NAME: ${{ vars.APP_SERVICE_PLAN_NAME }}
       APP_SERVICE_PLAN_SKU: ${{ vars.APP_SERVICE_PLAN_SKU }}
-      APPLICATION_INSIGHTS_NAME: ${{ vars.APPLICATION_INSIGHTS_NAME }}
-      STORAGE_ACCOUNT_NAME: ${{ vars.STORAGE_ACCOUNT_NAME }}
+      # Segredos/configuração de runtime injetados como variáveis Terraform.
+      TF_VAR_opusclip_api_key: ${{ secrets.OPUSCLIP_API_KEY }}
+      TF_VAR_opusclip_org_id: ${{ secrets.OPUSCLIP_ORG_ID }}
+      TF_VAR_notification_email_to: ${{ vars.NOTIFICATION_EMAIL_TO }}
+      TF_VAR_notification_email_from: ${{ vars.NOTIFICATION_EMAIL_FROM }}
     defaults:
       run:
         working-directory: infra/terraform
@@ -105,21 +108,15 @@ jobs:
         run: |
           RG_NAME="${RESOURCE_GROUP_NAME:-rg-lowopscast-schedule}"
           PLAN_NAME="${APP_SERVICE_PLAN_NAME:-plan-lowopscast-schedule}"
-          PLAN_SKU="${APP_SERVICE_PLAN_SKU:-B1}"
-          APPI_NAME="${APPLICATION_INSIGHTS_NAME:-appi-lowopscast-schedule}"
-          ST_NAME="${STORAGE_ACCOUNT_NAME:-}"
+          PLAN_SKU="${APP_SERVICE_PLAN_SKU:-FC1}"
           FUNC_APP_NAME="${FUNCTION_APP_NAME:-}"
 
           TF_ARGS=(
             -var "resource_group_name=${RG_NAME}"
             -var "app_service_plan_name=${PLAN_NAME}"
             -var "app_service_plan_sku=${PLAN_SKU}"
-            -var "application_insights_name=${APPI_NAME}"
           )
 
-          if [ -n "${ST_NAME}" ]; then
-            TF_ARGS+=( -var "storage_account_name=${ST_NAME}" )
-          fi
           if [ -n "${FUNC_APP_NAME}" ]; then
             TF_ARGS+=( -var "function_app_name=${FUNC_APP_NAME}" )
           fi

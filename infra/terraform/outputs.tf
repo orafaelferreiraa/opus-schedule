@@ -1,59 +1,34 @@
 output "function_app_name" {
-  value       = azurerm_linux_function_app.lowopscast.name
-  description = "Function app managed by this stack."
+  value       = azurerm_function_app_flex_consumption.lowopscast.name
+  description = "Function app gerenciado por este stack."
 }
 
 output "function_app_principal_id" {
-  value       = azurerm_linux_function_app.lowopscast.identity[0].principal_id
-  description = "Managed identity principal id for RBAC/Key Vault access policies."
+  value       = azurerm_function_app_flex_consumption.lowopscast.identity[0].principal_id
+  description = "Managed identity principal id (para RBAC futuro: KV, Foundry, Table)."
+}
+
+output "function_app_default_hostname" {
+  value       = azurerm_function_app_flex_consumption.lowopscast.default_hostname
+  description = "Hostname padrão do Function App."
 }
 
 output "resource_group_name" {
   value       = azurerm_resource_group.core.name
-  description = "Dedicated resource group for this stack."
+  description = "Resource group dedicado deste stack."
 }
 
 output "service_plan_id" {
   value       = azurerm_service_plan.core.id
-  description = "Dedicated App Service plan id."
+  description = "App Service plan dedicado."
 }
 
-output "storage_account_name" {
-  value       = azurerm_storage_account.core.name
-  description = "Dedicated storage account name."
-}
-
-output "application_insights_name" {
-  value       = azurerm_application_insights.core.name
-  description = "Dedicated Application Insights name."
-}
-
-output "key_vault_name" {
-  value       = azurerm_key_vault.core.name
-  description = "Key Vault used for runtime secrets."
-}
-
-output "foundry_account_name" {
-  value       = azurerm_cognitive_account.foundry.name
-  description = "Azure OpenAI/Foundry account name used by Judge."
-}
-
-output "foundry_account_id" {
-  value       = azurerm_cognitive_account.foundry.id
-  description = "Azure OpenAI/Foundry account resource id."
+output "shared_storage_account_name" {
+  value       = data.azurerm_storage_account.shared.name
+  description = "Storage account compartilhado reutilizado."
 }
 
 output "judge_endpoint" {
-  value       = azurerm_cognitive_account.foundry.endpoint
-  description = "Azure OpenAI endpoint used by Judge requests."
-}
-
-output "judge_primary_deployment_name" {
-  value       = azurerm_cognitive_deployment.judge_primary.name
-  description = "Primary model deployment name for Judge."
-}
-
-output "judge_fallback_deployment_name" {
-  value       = azurerm_cognitive_deployment.judge_fallback.name
-  description = "Fallback model deployment name for Judge."
+  value       = data.azurerm_cognitive_account.shared_foundry.endpoint
+  description = "Endpoint do Foundry compartilhado (Judge em modo hybrid)."
 }

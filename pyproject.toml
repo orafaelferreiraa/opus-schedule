@@ -1,0 +1,6 @@
+[tool.pytest.ini_options]
+# Permite rodar `pytest` da raiz do repositório: coloca `src/` no sys.path
+# (os testes fazem `import function_app` / `from shared... import`).
+pythonpath = ["src"]
+testpaths = ["src/tests"]
+addopts = "-q"
