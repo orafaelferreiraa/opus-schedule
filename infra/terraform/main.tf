@@ -22,9 +22,9 @@ data "azurerm_key_vault" "existing" {
   resource_group_name = data.azurerm_resource_group.core.name
 }
 
-# Existing resources are read via data sources.
-# If you decide to manage an already-created Function App from Terraform,
-# run terraform import for azurerm_linux_function_app.lowopscast before apply.
+# Existing shared resources are read via data sources.
+# The Function App below is created by Terraform.
+# Only run terraform import if this Function App was already created outside Terraform.
 resource "azurerm_linux_function_app" "lowopscast" {
   name                       = var.function_app_name
   resource_group_name        = data.azurerm_resource_group.core.name
