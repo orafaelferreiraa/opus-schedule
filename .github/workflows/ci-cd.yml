@@ -64,15 +64,28 @@ jobs:
       - name: Terraform init
         run: terraform init
 
-      - name: Terraform import existing Function App (best effort)
-        run: |
-          terraform import \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            azurerm_linux_function_app.lowopscast \
-            "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-jsearch/providers/Microsoft.Web/sites/func-lowopscast-prod" || true
-
       - name: Terraform validate
         run: terraform validate
+
+      - name: Import existing Function App into state (if present)
+        run: |
+          set -euo pipefail
+          if terraform state show azurerm_linux_function_app.lowopscast >/dev/null 2>&1; then
+            echo "Function App already tracked in state."
+            exit 0
+          fi
+
+          FUNCTION_APP_ID=$(az functionapp show \
+            --name "func-lowopscast-prod" \
+            --resource-group "rg-jsearch" \
+            --query id -o tsv 2>/dev/null || true)
+
+          if [ -n "$FUNCTION_APP_ID" ]; then
+            echo "Importing existing Function App: $FUNCTION_APP_ID"
+            terraform import azurerm_linux_function_app.lowopscast "$FUNCTION_APP_ID"
+          else
+            echo "Function App not found in Azure. Skipping import."
+          fi
 
       - name: Terraform plan
         run: terraform plan -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
@@ -102,12 +115,25 @@ jobs:
       - name: Terraform init
         run: terraform init
 
-      - name: Terraform import existing Function App (best effort)
+      - name: Import existing Function App into state (if present)
         run: |
-          terraform import \
-            -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}" \
-            azurerm_linux_function_app.lowopscast \
-            "/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/rg-jsearch/providers/Microsoft.Web/sites/func-lowopscast-prod" || true
+          set -euo pipefail
+          if terraform state show azurerm_linux_function_app.lowopscast >/dev/null 2>&1; then
+            echo "Function App already tracked in state."
+            exit 0
+          fi
+
+          FUNCTION_APP_ID=$(az functionapp show \
+            --name "func-lowopscast-prod" \
+            --resource-group "rg-jsearch" \
+            --query id -o tsv 2>/dev/null || true)
+
+          if [ -n "$FUNCTION_APP_ID" ]; then
+            echo "Importing existing Function App: $FUNCTION_APP_ID"
+            terraform import azurerm_linux_function_app.lowopscast "$FUNCTION_APP_ID"
+          else
+            echo "Function App not found in Azure. Skipping import."
+          fi
 
       - name: Terraform apply
         run: terraform apply -auto-approve -var "subscription_id=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
