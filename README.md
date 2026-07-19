@@ -4,7 +4,8 @@ Automação para transformar episódios do podcast **LowOpsCast** (YouTube [@Low
 em cortes verticais e distribuí-los **automaticamente** em YouTube Shorts, TikTok, Instagram, LinkedIn e
 Facebook, usando **OpusClip** (clipping por IA) + **API REST** + **Azure Functions**.
 
-> Status: planejamento concluído. Pronto para implementação da Fase 2.
+> Status: **Etapa 1 (MVP) implementada e deployada** em Azure Functions (Flex Consumption).
+> CI/CD verde (GitHub Actions + Terraform com state remoto). Etapas 2 e 3 pendentes.
 
 ## 1. Objetivo
 
@@ -40,8 +41,10 @@ flowchart LR
 - **Trigger:** RSS do canal (`youtube.com/feeds/videos.xml?channel_id=...`) — grátis, sem API key.
   Observação: episódios são **lives agendadas**; o RSS só lista o VOD após a live terminar e ser processada
   (então o disparo acontece no momento certo, não no agendamento).
-- **Hospedagem:** Azure Functions (Consumption) — Timer (RSS) + HTTP (webhook). Estado/idempotência em
-  Table/Blob Storage. Segredos em **Key Vault** (nunca no git).
+- **Hospedagem:** Azure Functions em **Flex Consumption (FC1)**, região East US 2 (~$0 ocioso).
+  Hoje só o HTTP da Etapa 1 (`schedule-existing-clips`); Timer (RSS) + webhook chegam nas Etapas 2/3.
+  Estado/idempotência em **Table Storage** (`lowopscaststate`) no storage compartilhado. Segredos
+  injetados como app settings via `TF_VAR_*` (GitHub secrets) — ver §8.
 - **Importante:** ao ligar o script, **desligar o Auto-Import nativo** (senão clipa 2x = gasta créditos em dobro).
 
 ## 4. Dados reais das redes (jul/2026) e insights cruzados
@@ -107,18 +110,38 @@ flowchart LR
 - Limites: 30 req/min core; scheduler 1 req/s; cap 900 créditos/mês de API; concorrência 4 projetos
 - OpenAPI: https://help.opus.pro/api-reference/openapi.json
 
-## 8. Infraestrutura existente (rg-jsearch) — reutilizada integralmente
+## 8. Infraestrutura — modelo híbrido (reúso + stack próprio)
+
+A infra é gerida por **Terraform** (`infra/terraform`) com **state remoto** no backend
+`azurerm` (RG `rg-state-opus`, storage `stoopusstate`, container `statetf`). O stack **reutiliza**
+recursos compartilhados do `rg-jsearch` (East US 2) via `data sources` e **cria** apenas o que é
+específico do projeto.
+
+**Reutilizado do `rg-jsearch` (somente leitura, via data sources):**
 
 | Recurso | Tipo | Uso no projeto |
 |---|---|---|
-| `plan-jobfinder-prod` | App Service Plan **Flex Consumption (FC1)** | Base do novo Function App |
-| `func-jobfinder-prod-randonix` | Function App Python 3.13, Linux | Referência de configuração |
-| `kv-jf-prod-randonix` | Key Vault | Armazena os 3 secrets do projeto |
-| `stjobfinderprodrandonix` | Storage Account | Table `lowopscaststate` (idempotência) |
-| `appi-jobfinder-prod` | Application Insights | Telemetria e logs |
-| `acs-jobfinder-prod` + `orafaelferreira.com` | ACS Email | Notificações por e-mail |
+| `stjobfinderprodrandonix` | Storage Account | Runtime da função + Table `lowopscaststate` (idempotência) |
+| `appi-jobfinder-prod` | Application Insights | Telemetria e logs (OpenTelemetry) |
+| `acs-jobfinder-prod` + `orafaelferreira.com` | ACS Email | Notificações por e-mail (domínio já verificado) |
+| `aif-jobfinder-prod-randonix` (`gpt-5-mini`) | AI Foundry / Azure OpenAI | Judge no modo `hybrid` (hoje dormente) |
 
-**Novo recurso a criar:** `func-lowopscast-prod` (Python 3.13, FC1, mesma plan) — custo ~$0/mês.
+**Criado por este stack (RG dedicado `rg-lowopscast-schedule`):**
+
+| Recurso | Detalhe |
+|---|---|
+| App Service Plan próprio | **Flex Consumption (FC1)** — Flex é 1 app por plano, então não dá para reusar o plano do jobfinder |
+| Function App `func-lowopscast-*` | Python 3.13, Linux, identidade gerenciada (System-Assigned) |
+| Container `lowopscast-app-package` | Pacote de deployment, no storage compartilhado |
+
+- **Segredos:** injetados como app settings via `TF_VAR_*` a partir de **GitHub secrets**
+  (`OPUSCLIP_API_KEY`) e connection strings resolvidas dos data sources (ACS, Storage). **Não** usa
+  Key Vault (o `kv-jf-prod-randonix` usa RBAC, que exigiria role assignments no CI) — migrar para KV
+  fica como hardening futuro.
+- **CI/CD:** `.github/workflows/ci-validate.yml` (testes + `terraform plan`) e `deploy.yml`
+  (`terraform apply` + `func publish`). O SP do CI precisa de **Storage Blob Data Contributor** no
+  `stoopusstate` (backend usa Azure AD; Owner não cobre o data plane de blob).
+- **Custo:** ~$0/mês (FC1 por consumo; demais recursos já existiam).
 
 ## 9. Decisões fechadas
 
@@ -130,15 +153,23 @@ flowchart LR
 | Notificação | **E-mail** via ACS + domínio `orafaelferreira.com` |
 | Trigger para lives | RSS detecta VOD automaticamente após live terminar |
 | Storage | Limpar projetos antigos no dashboard OpusClip antes de reativar |
-| Reutilizar infra jobfinder | Sim — Key Vault, Storage, App Insights, ACS, App Service Plan |
+| Hospedagem | **Flex Consumption (FC1)** em plano próprio (Flex é 1 app/plano) — East US 2 |
+| Reutilizar infra jobfinder | Sim, via `data sources` — Storage, App Insights, ACS+domínio, AI Foundry |
+| State do Terraform | Backend remoto `azurerm` (`rg-state-opus`/`stoopusstate`/`statetf`) |
+| Segredos | App settings via `TF_VAR_*`/GitHub secrets (sem Key Vault por ora) |
+| Judge (curadoria LLM) | Dormente (`rules_only`); usa `gpt-5-mini` do Foundry existente ao ligar `hybrid` |
 
 ## 10. Roadmap em 3 etapas
 
-### Etapa 1 — MVP com clips existentes *(implementando agora)*
-1. Function HTTP manual que lê clips **já processados** no dashboard OpusClip (via `GET /api/exportable-clips`).
-2. Filtra top-N por virality score e aplica matriz de cadência por rede.
-3. Cria agendamentos via `POST /api/publish-schedules`.
-4. **Objetivo:** testar o pipeline de ponta a ponta sem precisar clipar nada novo.
+### Etapa 1 — MVP com clips existentes *(✅ concluída — deployada)*
+1. Function HTTP `schedule-existing-clips` lê clips **já processados** (via `GET /api/exportable-clips`).
+2. Ranqueia top-N por virality score e aplica a matriz de cadência por rede. Observação: o schema
+   público do `exportable-clips` **não expõe** um campo de score — o código sonda nomes conhecidos
+   (`viralityScore` etc.) e cai para `durationMs` como proxy quando ausente.
+3. Cria agendamentos via `POST /api/publish-schedules`, com **idempotência** em Table Storage
+   (não reagenda o mesmo clip+rede) e resumo por e-mail (ACS).
+4. Curadoria opcional pela **Judge** (`off`/`rules_only`/`hybrid`; hoje `rules_only`).
+5. **Pendente:** validação funcional com um `collection_id` real do dashboard (dry-run).
 
 ### Etapa 2 — Episódios prontos ainda não publicados
 1. Subir para o OpusClip os episódios gravados mas ainda não processados.
