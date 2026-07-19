@@ -58,6 +58,7 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           audience: api://AzureADTokenExchange
+          allow-no-subscriptions: true
 
       - name: Azure Login (Service Principal secret fallback)
         id: azure_login_sp
@@ -66,27 +67,43 @@ jobs:
         uses: azure/login@v3
         with:
           creds: ${{ env.AZURE_CREDENTIALS }}
+          allow-no-subscriptions: true
+
+      - name: Validate Azure subscription access
+        id: azure_subscription_check
+        if: steps.azure_login_oidc.outcome == 'success' || steps.azure_login_sp.outcome == 'success'
+        continue-on-error: true
+        run: |
+          az cloud show --query name -o tsv
+          az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          az account show --query "{subscriptionId:id, tenantId:tenantId, user:user.name}" -o json
 
       - name: Fail when Azure auth is not configured
         if: >-
-          steps.azure_login_oidc.outcome == 'failure' &&
           (
-            env.AZURE_CREDENTIALS == '' ||
-            steps.azure_login_sp.outcome == 'failure'
-          )
+            steps.azure_login_oidc.outcome == 'failure' &&
+            (
+              env.AZURE_CREDENTIALS == '' ||
+              steps.azure_login_sp.outcome == 'failure'
+            )
+          ) ||
+          steps.azure_subscription_check.outcome == 'failure'
         env:
           EXPECTED_SUBJECT_LEGACY: repo:${{ github.repository }}:ref:${{ github.ref }}
           EXPECTED_SUBJECT_IDS: repo:${{ github.repository_owner }}@${{ github.event.repository.owner.id }}/${{ github.event.repository.name }}@${{ github.event.repository.id }}:ref:${{ github.ref }}
           EXPECTED_AUDIENCE: api://AzureADTokenExchange
         run: |
-          echo "OIDC login failed and AZURE_CREDENTIALS fallback is missing/invalid."
-          echo "Configure a federated credential in Microsoft Entra ID with:"
+          echo "Azure authentication/subscription validation failed."
+          echo "If OIDC login failed, configure Entra federated credential with:"
           echo "  issuer: https://token.actions.githubusercontent.com"
           echo "  audience: ${EXPECTED_AUDIENCE}"
           echo "  subject (legacy format): ${EXPECTED_SUBJECT_LEGACY}"
           echo "  subject (immutable IDs format): ${EXPECTED_SUBJECT_IDS}"
-          echo "If repository is configured to use immutable IDs in OIDC tokens, use the IDs format."
-          echo "Alternative: set AZURE_CREDENTIALS secret with valid Service Principal JSON."
+          echo "If login succeeded but subscription check failed, likely causes are:"
+          echo "  1) AZURE_CLIENT_ID points to another app registration/service principal"
+          echo "  2) Service principal has no RBAC on the target subscription"
+          echo "  3) AZURE_TENANT_ID does not own this subscription"
+          echo "  4) Subscription is in a different cloud (Gov/China)"
           exit 1
 
       - name: Setup Terraform
