@@ -284,6 +284,20 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                     allowed = {"APPROVE"}
                 clips = [clip for clip in clips if decision_by_id.get(str(clip.get("id", ""))) in allowed]
 
+                # Ponte relatório→agendamento: anexa o score de CONTEÚDO da Judge LLM
+                # aos clips para o build_schedule_plan ranquear por substância real
+                # (payoff/insight) em vez de duração. Só o modo hybrid (source=="llm")
+                # gera scores diferenciados; rules_only dá 100 uniforme e é ignorado.
+                content_score_by_id = {
+                    str(result.get("id", "")): int(result.get("final_score", 0))
+                    for result in judge_results
+                    if str(result.get("source", "")) == "llm"
+                }
+                for clip in clips:
+                    score = content_score_by_id.get(str(clip.get("id", "")))
+                    if score is not None:
+                        clip["_content_score"] = score
+
                 logger.info(
                     "Judge aplicada aos clips",
                     extra={

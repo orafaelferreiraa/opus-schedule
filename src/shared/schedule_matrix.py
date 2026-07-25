@@ -121,6 +121,12 @@ def build_schedule_plan(clips: list[dict], accounts: list[dict]) -> dict[str, li
 # Helpers
 # ---------------------------------------------------------------------------
 
+# Score de SUBSTÂNCIA DE CONTEÚDO (0-100) atribuído pela Judge LLM (gpt-5-mini)
+# no caminho de agendamento (function_app anexa `_content_score` a cada clip
+# quando a Judge roda em modo `hybrid`). É a melhor sinalização disponível de
+# viralidade real — julga payoff/insight/humor, não só duração ou fala limpa.
+_CONTENT_FIELDS = ("_content_score", "contentScore")
+
 # Campos de score de viralidade que a OpusClip pode retornar. O schema público
 # do endpoint /exportable-clips não documenta um score, mas o dashboard o expõe
 # e a resposta pode trazê-lo sob um destes nomes — sondamos todos e caímos para
@@ -129,11 +135,20 @@ _VIRALITY_FIELDS = ("viralityScore", "virality_score", "viralScore", "score")
 
 
 def _clip_score(clip: dict) -> tuple[int, float]:
-    """Chave de ordenação: (tem_score, valor).
+    """Chave de ordenação: (tier, valor), maior primeiro (``sorted(reverse=True)``).
 
-    Clips com score de viralidade numérico vêm primeiro (ordenados pelo score);
-    os demais caem para durationMs como proxy. Usado com ``sorted(reverse=True)``.
+    Três tiers, em ordem de confiança:
+    - tier 2: score de CONTEÚDO da Judge LLM (payoff/insight real) — o melhor sinal;
+    - tier 1: score de viralidade nativo da OpusClip, quando presente;
+    - tier 0: ``durationMs`` como proxy, quando não há nenhum score.
+
+    Um tier superior sempre vence um inferior, independentemente do valor, então
+    um corte julgado ótimo mas curto ganha de um corte longo sem julgamento.
     """
+    for field in _CONTENT_FIELDS:
+        val = clip.get(field)
+        if isinstance(val, (int, float)) and not isinstance(val, bool):
+            return (2, float(val))
     for field in _VIRALITY_FIELDS:
         val = clip.get(field)
         if isinstance(val, (int, float)) and not isinstance(val, bool):

@@ -129,6 +129,26 @@ def test_clip_score_ignores_boolean_field():
     assert _clip_score({"id": "x", "viralityScore": True, "durationMs": 5000}) == (0, 5000.0)
 
 
+def test_clip_score_content_beats_virality_and_duration():
+    # Tier de conteúdo (Judge LLM) vence viralidade nativa e duração, mesmo com valor menor.
+    content = {"id": "P.c1", "_content_score": 40, "viralityScore": 99, "durationMs": 999999}
+    viral = {"id": "P.c2", "viralityScore": 99, "durationMs": 999999}
+    assert _clip_score(content) == (2, 40.0)
+    assert _clip_score(content) > _clip_score(viral)
+
+
+def test_ranking_orders_by_content_score():
+    # Corte curto mas julgado ótimo pela Judge vence corte longo sem julgamento de conteúdo.
+    clips = [
+        {"id": "P.longo_raso", "projectId": "P", "durationMs": 90000, "title": "L"},
+        {"id": "P.curto_otimo", "projectId": "P", "durationMs": 20000, "_content_score": 88, "title": "C"},
+    ]
+    accounts = [{"platform": "YOUTUBE", "postAccountId": "y", "id": "y"}]
+    plan = build_schedule_plan(clips, accounts)
+    order = [item["clipId"] for item in plan["YOUTUBE"]]
+    assert order == ["curto_otimo", "longo_raso"], f"Esperado conteúdo primeiro, obtido {order}"
+
+
 def test_ranking_orders_by_virality_score():
     clips = [
         {"id": "P.low", "projectId": "P", "durationMs": 90000, "viralityScore": 10, "title": "L"},

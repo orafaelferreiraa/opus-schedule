@@ -1,0 +1,1 @@
+{"mcpServers":{"MCP_DOCKER":{"command":"/mnt/c/Program Files/Docker/Docker/resources/bin/docker.exe","args":["mcp","gateway","run","--profile","profile"],"type":"stdio"}}}

@@ -53,13 +53,13 @@ class JudgeSettings:
             model_deployment_primary=str(
                 body.get(
                     "judge_model_deployment_primary",
-                    os.environ.get("JUDGE_MODEL_DEPLOYMENT_PRIMARY", "gpt-5.6-sol"),
+                    os.environ.get("JUDGE_MODEL_DEPLOYMENT_PRIMARY", "gpt-5-mini"),
                 )
             ),
             model_deployment_fallback=str(
                 body.get(
                     "judge_model_deployment_fallback",
-                    os.environ.get("JUDGE_MODEL_DEPLOYMENT_FALLBACK", "gpt-5.4-mini"),
+                    os.environ.get("JUDGE_MODEL_DEPLOYMENT_FALLBACK", "gpt-5-mini"),
                 )
             ),
             timeout_ms=int(os.environ.get("JUDGE_TIMEOUT_MS", "12000")),
@@ -230,12 +230,17 @@ def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deploymen
         f"?api-version={settings.api_version}"
     )
 
+    # Inclui a TRANSCRIÇÃO do corte (não só título/descrição): o veredito precisa
+    # julgar a substância do conteúdo falado, não só os metadados. `__silence` da
+    # transcrição vira [pausa] para o modelo entender o ritmo.
+    transcript = str(clip.get("text", "") or "").replace("__silence", " [pausa] ")[:4000]
     prompt_clip = {
         "id": str(clip.get("id", "")),
         "title": str(clip.get("title", "") or ""),
         "description": str(clip.get("description", "") or ""),
         "hashtags": str(clip.get("hashtags", "") or ""),
         "duration_ms": int(clip.get("durationMs", 0) or 0),
+        "transcript": transcript,
     }
 
     body = {
@@ -245,17 +250,24 @@ def _call_foundry_judge(clip: dict[str, Any], settings: JudgeSettings, deploymen
             {
                 "role": "system",
                 "content": (
-                    "You are a strict short-video quality judge. "
-                    "Return only valid JSON with keys: final_score, soft_signals, audit_reason. "
-                    "final_score is 0-100 integer. soft_signals is an object with rhythm, clarity, context, engagement, pauses (0-100)."
+                    "Você é um curador CRÍTICO de cortes virais para o LowOpsCast, um podcast BR de "
+                    "tecnologia/DevOps (público: profissionais de TI, 25-34, majoritariamente homens). "
+                    "Um corte só vale postar se o CONTEÚDO tiver ao menos um payoff concreto: insight "
+                    "técnico útil, conselho de carreira acionável, humor genuíno sobre a rotina de TI, "
+                    "curiosidade/fato surpreendente, ou uma virada de história com lição clara. "
+                    "'A fala flui bem e é coerente' NÃO basta — isso é só edição. Reprove anedota "
+                    "genérica sem lição, história sem payoff, e conteúdo raso; na dúvida, penalize. "
+                    "Responda SOMENTE JSON válido com as chaves: final_score (int 0-100, força do "
+                    "CONTEÚDO), soft_signals (objeto com payoff, clareza, contexto, engajamento, "
+                    "polimento — cada 0-100), audit_reason (frase curta em PT-BR justificando)."
                 ),
             },
             {
                 "role": "user",
                 "content": (
-                    "Evaluate this clip for publish-readiness. "
-                    "Prefer penalizing incoherent cuts, weak context, and long pauses.\n"
-                    f"clip={json.dumps(prompt_clip, ensure_ascii=True)}"
+                    "Avalie a substância deste corte para publicação (foque no CONTEÚDO da "
+                    "transcrição, não na qualidade de fala).\n"
+                    f"clip={json.dumps(prompt_clip, ensure_ascii=False)}"
                 ),
             },
         ],

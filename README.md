@@ -163,9 +163,12 @@ específico do projeto.
 
 ### Etapa 1 — MVP com clips existentes *(✅ concluída — deployada)*
 1. Function HTTP `schedule-existing-clips` lê clips **já processados** (via `GET /api/exportable-clips`).
-2. Ranqueia top-N por virality score e aplica a matriz de cadência por rede. Observação: o schema
-   público do `exportable-clips` **não expõe** um campo de score — o código sonda nomes conhecidos
-   (`viralityScore` etc.) e cai para `durationMs` como proxy quando ausente.
+2. Ranqueia top-N e aplica a matriz de cadência por rede. O ranqueamento (`_clip_score`) usa três
+   tiers, em ordem de confiança: (1) **score de conteúdo da Judge LLM** (`_content_score`, anexado
+   quando `judge_mode=hybrid` — julga payoff/insight real); (2) **virality score** nativo da OpusClip,
+   se presente (o schema público de `exportable-clips` não o expõe, então o código sonda nomes
+   conhecidos como `viralityScore`); (3) `durationMs` como proxy, quando não há score. Um tier
+   superior sempre vence, então um corte curto e ótimo ganha de um corte longo e raso.
 3. Cria agendamentos via `POST /api/publish-schedules`, com **idempotência** em Table Storage
    (não reagenda o mesmo clip+rede) e resumo por e-mail (ACS).
 4. Curadoria opcional pela **Judge** (`off`/`rules_only`/`hybrid`; hoje `rules_only`).
