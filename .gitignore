@@ -1,0 +1,17 @@
+# Artefatos gerados a nível de projeto (os subdiretórios src/ e infra/terraform/
+# têm .gitignore próprios; este cobre a raiz).
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+.venv-ci/
+
+# Configuração local do Claude Code (não versionar).
+.claude/settings.local.json
+
+# Segredo: config local do Functions com a OpusClip API key (já ignorado em
+# src/.gitignore; redundância de segurança para nunca commitar por engano).
+src/local.settings.json
+local.settings.json
