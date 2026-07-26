@@ -137,5 +137,11 @@ az functionapp config appsettings list -n <func-lowopscast-*> -g rg-lowopscast-s
 ```
 
 Variáveis que mudam comportamento: `JUDGE_MODE` (`off`/`rules_only`/`hybrid`), `JUDGE_THRESHOLD`,
-`JUDGE_PROVIDER`, `JUDGE_AUTH_MODE`, `STATE_TABLE_NAME`, `NOTIFICATION_EMAIL_TO`,
+`JUDGE_INCLUDE_REVIEW_IN_DRY_RUN`, `JUDGE_AUTH_MODE`, `STATE_TABLE_NAME`, `NOTIFICATION_EMAIL_TO`,
 `OPUSCLIP_ORG_ID`. Mudança de valor vai pelo Terraform, não por `az` — `az` é para **ler**.
+
+`JUDGE_PROVIDER` **não** muda nada: é lido para `settings.provider` (`judge.py:48`) e nunca usado —
+`_call_foundry_judge` é incondicional. Não usar como alavanca de diagnóstico.
+
+A semântica completa das `JUDGE_*` (e as duas implementações de LLM que as compartilham) está na
+skill `clip-curation-internals`.

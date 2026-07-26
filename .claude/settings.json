@@ -1,0 +1,24 @@
+{
+  "extraKnownMarketplaces": {
+    "antonbabenko": {
+      "source": {
+        "source": "github",
+        "repo": "antonbabenko/agent-plugins"
+      }
+    },
+    "microsoft-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "MicrosoftDocs/Agent-Skills"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "azure@claude-plugins-official": true,
+    "terraform-skill@antonbabenko": true,
+    "azure-agent-skills@microsoft-agent-skills": true
+  },
+  "env": {
+    "AZURE_MCP_COLLECT_TELEMETRY": "false"
+  }
+}
