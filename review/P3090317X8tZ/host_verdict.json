@@ -1,0 +1,77 @@
+[
+  {
+    "id": "P3090317X8tZ.uLchSNNiXT",
+    "is_rafael": false,
+    "reason": "Substancia e do Paulo: produzir curso e trazer pessoas na Alura, jornada dele."
+  },
+  {
+    "id": "P3090317X8tZ.cSJZWcbiWR",
+    "is_rafael": false,
+    "reason": "Fala dividida; a abertura (nao abandonar a base/IaC/observabilidade) e do convidado."
+  },
+  {
+    "id": "P3090317X8tZ.Kv11g8IhFO",
+    "is_rafael": false,
+    "reason": "Responsabilidade de quem educa o aluno pro mercado; visao do Paulo como educador da Alura."
+  },
+  {
+    "id": "P3090317X8tZ.KU8zbrRWa7",
+    "is_rafael": false,
+    "reason": "Fato biografico do Paulo: era mecanico de motor de aviao antes da TI."
+  },
+  {
+    "id": "P3090317X8tZ.L0a6dCD1ZK",
+    "is_rafael": false,
+    "reason": "Nostalgia do menino da TI (AD on-prem/GPO); experiencia de carreira do Paulo."
+  },
+  {
+    "id": "P3090317X8tZ.cNbvpNi1Ub",
+    "is_rafael": false,
+    "reason": "Historia do Paulo: fintech na maquina embaixo da mesa ate migrar pra AWS."
+  },
+  {
+    "id": "P3090317X8tZ.byHViFeJqr",
+    "is_rafael": false,
+    "reason": "Banter de DevOps compartilhado (POC que virou prod); sem dono claro, nao e insight so do Rafael."
+  },
+  {
+    "id": "P3090317X8tZ.eigu0XNK6Q",
+    "is_rafael": false,
+    "reason": "Trajetoria do Paulo: certificacoes Microsoft (MCSE) em vez de faculdade."
+  },
+  {
+    "id": "P3090317X8tZ.8tMQbLadTX",
+    "is_rafael": false,
+    "reason": "Memoria do Paulo do data center (robozinho) na UOL Diveo."
+  },
+  {
+    "id": "P3090317X8tZ.qbZyNpchXm",
+    "is_rafael": true,
+    "reason": "CORRIGIDO pelo Rafael: é ele falando"
+  },
+  {
+    "id": "P3090317X8tZ.JOcSmQlJVS",
+    "is_rafael": false,
+    "reason": "Gestao de pessoas na trajetoria do Paulo como coordenador."
+  },
+  {
+    "id": "P3090317X8tZ.Q8Wht3vlOf",
+    "is_rafael": false,
+    "reason": "CORRIGIDO pelo Rafael: NÃO é ele (era o convidado)"
+  },
+  {
+    "id": "P3090317X8tZ.2ClHVofwkF",
+    "is_rafael": false,
+    "reason": "Insight de latencia em trading; dominio da corretora, experiencia do Paulo."
+  },
+  {
+    "id": "P3090317X8tZ.mv9PySuolQ",
+    "is_rafael": false,
+    "reason": "Gestao de equipe (10 personalidades); carreira de lideranca do Paulo."
+  },
+  {
+    "id": "P3090317X8tZ.BQh8OGf81a",
+    "is_rafael": false,
+    "reason": "Confusao do hype de DevOps em 2014/2015 puxada pela jornada de entrada do Paulo."
+  }
+]

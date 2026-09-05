@@ -136,7 +136,14 @@ class OpusClient:
         return self._paginate_clips("findByCollectionId", collectionId=collection_id, page_size=page_size)
 
     def _paginate_clips(self, q: str, page_size: int = 50, **kwargs) -> list[dict]:
+        """Pagina `/exportable-clips` até a página vir vazia ou incompleta.
+
+        A API às vezes ignora `pageNum` e devolve a mesma página indefinidamente
+        (verificado empiricamente em projeto com >= page_size clips) — sem essa
+        guarda de IDs já vistos, isso vira loop infinito.
+        """
         clips: list[dict] = []
+        seen_ids: set[str] = set()
         page = 1
 
         with tracer.start_as_current_span("opus.paginate_clips") as span:
@@ -148,7 +155,11 @@ class OpusClient:
                 page_clips = _extract_list(data)
                 if not page_clips:
                     break
-                clips.extend(page_clips)
+                new_clips = [c for c in page_clips if isinstance(c, dict) and c.get("id") not in seen_ids]
+                if not new_clips:
+                    break  # API repetiu a página anterior (pageNum ignorado) — para aqui
+                seen_ids.update(c["id"] for c in new_clips)
+                clips.extend(new_clips)
                 if len(page_clips) < page_size:
                     break
                 page += 1

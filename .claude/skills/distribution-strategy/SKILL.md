@@ -56,7 +56,7 @@ concatenado, antes do truncamento em 2000 chars. Qualquer refatoração que poss
 
 ## O que viraliza (cross-rede, observado)
 
-Alimenta `curationPref` da OpusClip e o prompt do Judge:
+Alimenta `curationPref` da OpusClip e a rubrica de curadoria (`src/shared/curation_rubric.md`):
 
 1. **Carreira** — ATS, "Linux abre portas"
 2. **Humor DevOps** — "Deploy 17h59", "QA de madrugada"
@@ -70,16 +70,19 @@ Retenção média em Shorts: 35,2%.
 `_clip_score` usa três tiers **em ordem de confiança**; um tier superior sempre vence, então um
 corte curto e ótimo ganha de um corte longo e raso:
 
-1. **Score de conteúdo do Judge LLM** (`_content_score`, presente quando `JUDGE_MODE=hybrid`) —
-   julga payoff e insight real, não só fala limpa.
+1. **Score de conteúdo da curadoria** (`_content_score`) — payoff/insight real, não só fala limpa.
+   Vem do **harness local dirigido pelo Claude Code** (`tools/curate/plan.py`, a partir do
+   `verdicts.json` que eu escrevo aplicando `src/shared/curation_rubric.md`). O endpoint HTTP
+   sozinho **não** anexa esse score — só o harness.
 2. **Virality score nativo** da OpusClip, quando presente (não está no schema público — é sondado).
 3. **`durationMs`** como proxy, quando não há score.
 
 Não achate isso numa soma ponderada sem combinar com o usuário: a ordem de tiers é a decisão de
 design.
 
-`JUDGE_MODE` hoje é `rules_only`. Em `hybrid` usa `gpt-5-mini` do AI Foundry existente
-(`aif-jobfinder-prod-randonix`).
+O Azure AI Foundry (`gpt-5-mini`) foi removido em 2026-09-02; não existe mais judge LLM autônomo no
+cloud. `JUDGE_MODE=rules_only` = só gate mecânico. A mecânica completa está na skill
+`clip-curation-internals`.
 
 ## Orçamento (guarda-corpo)
 

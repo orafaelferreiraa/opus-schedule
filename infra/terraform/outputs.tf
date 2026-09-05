@@ -5,7 +5,7 @@ output "function_app_name" {
 
 output "function_app_principal_id" {
   value       = azurerm_function_app_flex_consumption.lowopscast.identity[0].principal_id
-  description = "Managed identity principal id (para RBAC futuro: KV, Foundry, Table)."
+  description = "Managed identity principal id (para RBAC futuro: KV, Table)."
 }
 
 output "function_app_default_hostname" {
@@ -26,9 +26,4 @@ output "service_plan_id" {
 output "shared_storage_account_name" {
   value       = data.azurerm_storage_account.shared.name
   description = "Storage account compartilhado reutilizado."
-}
-
-output "judge_endpoint" {
-  value       = data.azurerm_cognitive_account.shared_foundry.endpoint
-  description = "Endpoint do Foundry compartilhado (Judge em modo hybrid)."
 }

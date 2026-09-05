@@ -24,9 +24,24 @@ Leia antes de mexer em payload ou parsing:
 3. **`viralityScore` não está no schema público.** O OpenAPI de `exportable-clips` não expõe. O
    código sonda `_VIRALITY_FIELDS` e cai para `durationMs` como proxy. Não assuma que o campo
    existe; veja a hierarquia de tiers em `_clip_score` (`src/shared/schedule_matrix.py`).
-4. **`renderPref` só aceita campos do `RenderPreferenceDto` documentado.** Campos inventados
-   (`removeFillerWord`, `removePause`) fazem o PUT falhar. O conjunto validado está em
-   `OpusClient._SPLIT_RENDER_PREF`.
+4. **`PUT /exportable-clips/{id}` REPLACES o `renderPref` inteiro** — mande o objeto completo, não
+   parcial (parcial apaga os outros campos, ex.: layout). Verificado empiricamente 2026-09-03
+   (corrige nota antiga que dizia que `removeFillerWord`/`removePause` davam 400): esses campos
+   EXISTEM, mas como **objetos**, não booleanos:
+   - `removeFillerWord: {enabled: bool, selectedFillers: [str, ...]}` — o template atual vem
+     `enabled:true` mas `selectedFillers:[]` (vazio → **não corta muletas PT-BR**; por isso o
+     filler% dos cortes segue alto). Preencher `selectedFillers` (ex.: `["né","tipo","aí"]`) é aceito.
+   - `removePause: {enabled: bool, pauseDuration: float}` — já ligado no template; corta ~16s/corte
+     de pausa no render (por isso `durationMs` < span do `timeRanges`, e o `__silence` sumiu do texto).
+   - **`timeRanges` É gravável** (a doc/OpenAPI diz "read-only" — falso): `[[startMs, endMs], ...]`.
+     PUT com timeRanges editado retorna 200 e persiste.
+   `OpusClient._SPLIT_RENDER_PREF` ainda serve pra forçar layout split; para fillers/in-out, mande o
+   renderPref completo do próprio clip com os campos ajustados.
+   **PORÉM — pegadinha grande:** setar esses campos **não re-renderiza o clip**. Não há endpoint de
+   re-render por clip (o OpenAPI só tem `POST /collections/{id}/export`, e a conta pode não ter
+   coleção). Edição via API é **preferência de render**: só materializa quando o clip é renderizado
+   de novo (export de coleção ou, presumivelmente, no publish). Confirmado: após PUT, `durationMs`/
+   `text` não mudaram em 75s de polling. Não prometa "editei o corte" — você editou a *preferência*.
 5. **`publishAt` é UTC ISO 8601.** A matriz de cadência raciocina em BRT
    (`America/Sao_Paulo`) e converte na saída — nunca mande horário local.
 6. **`subAccountId` é obrigatório** para `FACEBOOK_PAGE`, `INSTAGRAM_BUSINESS` e `LINKEDIN`

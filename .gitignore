@@ -8,6 +8,15 @@ __pycache__/
 .venv/
 .venv-ci/
 
+# Scratch de trabalho (downloads/transcrições temporárias) — nunca versionar.
+.scratch/
+
+# Harness de curadoria local (tools/curate/): dados brutos/derivados por execução.
+# Os veredictos (verdicts.json) e o relatório (report.md) PODEM ser versionados como
+# entregável; clips.json e transcripts.md são volumosos e regeneráveis pelo prep.py.
+review/**/clips.json
+review/**/transcripts.md
+
 # Configuração local do Claude Code (não versionar).
 .claude/settings.local.json
 

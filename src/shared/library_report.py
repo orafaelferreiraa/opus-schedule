@@ -1,12 +1,14 @@
 """
-Relatório de qualidade da biblioteca de cortes (OpusClip).
+Relatório de qualidade da biblioteca de cortes (OpusClip): gate mecânico.
 
-Enumera os projetos, lê os cortes e avalia quais valem postar combinando:
-- gate mecânico: limpeza da fala da transcrição (pausas, repetições, gaguejo, filler) + duração;
-- veredito de CONTEÚDO do LLM gpt-5-mini (opcional): o corte tem substância/payoff real
-  para o público do LowOpsCast, não apenas fala limpa e coerente.
+Enumera os projetos, lê os cortes e aplica o gate mecânico determinístico (limpeza da
+fala da transcrição — pausas, repetições, gaguejo, filler — + duração). `recommended` =
+passou no gate mecânico.
 
-`recommended` = passou no gate mecânico E (se use_llm) o LLM aprovou o CONTEÚDO.
+A avaliação de SUBSTÂNCIA de conteúdo (payoff/insight) foi removida deste caminho junto
+com o Azure AI Foundry: a curadoria de conteúdo é feita localmente pelo Claude Code via o
+harness em ``tools/curate/`` (rubrica única em ``src/shared/curation_rubric.md``).
+
 Sinais nativos da OpusClip (raw/hook/coherence/connection) são só informativos — não
 discriminam substância (verificado empiricamente: anedotas fracas recebem nota alta).
 Independe do layout. O mesmo código roda local ou dentro do Function App.
@@ -14,19 +16,22 @@ Independe do layout. O mesmo código roda local ou dentro do Function App.
 
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-
 from shared.clip_quality import (
     DEFAULT_RULES,
-    LLMSettings,
     _num,
     extract_speech_signals,
-    llm_assess,
     rule_verdict,
 )
 
 # Projetos que são vídeos pessoais do Rafael — fora da automação (ver memória).
-DEFAULT_EXCLUDE_PROJECT_IDS = {"P30318211wd3", "P3020416EqOU", "P3020716CxZv"}
+DEFAULT_EXCLUDE_PROJECT_IDS = {
+    "P30318211wd3",  # comunicação2.mp4
+    "P3020416EqOU",  # 20260203_193915.mp4
+    "P3020716CxZv",  # 1.mp4
+    "P30830225X8I",  # 20260723_141414.mp4
+    "P3020412QRU9",  # Tech Floripa Cast #010 - Rafael Ferreira (outro show, não é LowOpsCast)
+    "P3083021EbE1",  # Cloud para Devs – Do Localhost ao Deploy Escalável
+}
 
 
 def _assess(clip: dict, rules: dict | None) -> dict:
@@ -47,7 +52,6 @@ def _assess(clip: dict, rules: dict | None) -> dict:
         "filler_pct": signals["filler_pct"],
         "rule_passed": rule["passed"],
         "rule_reasons": rule["reasons"],
-        "_clip": clip,  # temporário para o LLM; removido antes de serializar
     }
 
 
@@ -57,16 +61,9 @@ def build_library_report(
     project_ids: list[str] | None = None,
     exclude_project_ids: set[str] | list[str] | None = None,
     rules: dict | None = None,
-    use_llm: bool = False,
-    llm_scope: str = "candidates",
-    max_workers: int = 10,
     top_n_per_project: int | None = None,
 ) -> dict:
-    """Monta o relatório de qualidade. `client` é um OpusClient (ou compatível).
-
-    `llm_scope`: "candidates" (default) roda o LLM só nos que passaram o gate
-    mecânico; "all" roda em todos os cortes.
-    """
+    """Monta o relatório de qualidade (gate mecânico). `client` é um OpusClient (ou compatível)."""
     exclude = set(exclude_project_ids if exclude_project_ids is not None else DEFAULT_EXCLUDE_PROJECT_IDS)
     projects = [{"projectId": pid} for pid in project_ids] if project_ids else client.list_projects()
 
@@ -91,32 +88,13 @@ def build_library_report(
         analyzed += 1
         projects_out.append({"projectId": pid, "title": title, "_assessed": assessed})
 
-    llm_used = False
-    llm_settings = LLMSettings() if use_llm else None
-    if use_llm and llm_settings and llm_settings.enabled:
-        targets = all_assessments if llm_scope == "all" else [a for a in all_assessments if a["rule_passed"]]
-        if targets:
-            llm_used = True
-            with ThreadPoolExecutor(max_workers=max_workers) as pool:
-                verdicts = list(pool.map(lambda a: llm_assess(a["_clip"], llm_settings), targets))
-            for a, v in zip(targets, verdicts):
-                a["llm"] = {k: v[k] for k in ("ok", "score", "approve", "content_flags", "speech_flags", "reason")}
-
-    # Decisão final: gate mecânico E (se LLM rodou nesse item) aprovação de conteúdo.
+    # Decisão final: passou no gate mecânico.
     for a in all_assessments:
-        llm = a.get("llm")
-        content_ok = (llm is None) or (bool(llm.get("ok")) and bool(llm.get("approve")))
-        a["recommended"] = bool(a["rule_passed"] and content_ok)
-        a.pop("_clip", None)
-
-    def _llm_score(a):
-        llm = a.get("llm") or {}
-        return llm["score"] if llm.get("ok") and llm.get("score") is not None else -1
+        a["recommended"] = bool(a["rule_passed"])
 
     def sort_key(a):
         return (
             a["recommended"],
-            _llm_score(a),
             a["raw"] if a["raw"] is not None else -1,
             a["hook"] if a["hook"] is not None else -1,
         )
@@ -130,7 +108,6 @@ def build_library_report(
     all_assessments.sort(key=sort_key, reverse=True)
     return {
         "rules": {**DEFAULT_RULES, **(rules or {})},
-        "llm_used": llm_used,
         "projects_analyzed": analyzed,
         "excluded_projects": excluded,
         "total_clips": len(all_assessments),

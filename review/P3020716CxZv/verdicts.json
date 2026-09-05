@@ -1,0 +1,268 @@
+[
+  {
+    "id": "P3020716CxZv.IOYlKW2W2i",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "gaguejo"
+    ],
+    "reason": "Fecha um raciocinio completo sobre como o dialogo interno (autoconversa) determina o comportamento e o resultado do dia, com exemplo concreto de fala positiva vs negativa e mensagem final de conviccao."
+  },
+  {
+    "id": "P3020716CxZv.qh5RzIeRZb",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "generico",
+      "previsivel"
+    ],
+    "speech_flags": [],
+    "reason": "E so o mantra final ('se pensar que nao consegue, nao consegue; se pensar que consegue, consegue') sem exemplo ou desenvolvimento proprio, clicheu motivacional generico demais para valer sozinho."
+  },
+  {
+    "id": "P3020716CxZv.uM5posrMJc",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "pausas",
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Conselho de carreira concreto: comunicacao/network pesam mais que hard skill isolada, e 'nao adianta ser o melhor se ninguem souber' e dica acionavel de visibilidade profissional."
+  },
+  {
+    "id": "P3020716CxZv.NmAnVsmx5I",
+    "approve": false,
+    "final_score": 32,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [],
+    "reason": "Conselho de trabalho em equipe (pedir ajuda, nao passar por cima do colega) e senso comum sem tecnica especifica ou exemplo que surpreenda."
+  },
+  {
+    "id": "P3020716CxZv.3HCULcKtMT",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Dica de saude (praticar atividade fisica, comer melhor, se autocuidar) e generica e batida, sem insight especifico que renda o tempo do espectador."
+  },
+  {
+    "id": "P3020716CxZv.0DSiQDhMcG",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "pausas",
+      "repeticao",
+      "filler"
+    ],
+    "reason": "Insight pratico de comunicacao nao verbal com exemplo vivido (moletom no casamento, postura aberta vs fechada) que ensina a calibrar a mensagem transmitida pelo corpo."
+  },
+  {
+    "id": "P3020716CxZv.BHqtPEsQy6",
+    "approve": true,
+    "final_score": 65,
+    "content_flags": [],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Analogia forte e memoravel (nutricionista acima do peso, personal sem shape) para explicar credibilidade, insight concreto sobre coerencia entre imagem e mensagem."
+  },
+  {
+    "id": "P3020716CxZv.txgFngQUkT",
+    "approve": true,
+    "final_score": 63,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "repeticao",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Reflexao sobre autoestima como pre-requisito para se posicionar e compartilhar conteudo apesar de haters, com exemplo pessoal concreto (disclaimer de opiniao propria)."
+  },
+  {
+    "id": "P3020716CxZv.sX6IsLki47",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "incompleto",
+      "generico"
+    ],
+    "speech_flags": [
+      "pausas",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "So abre o exemplo de autoconversa positiva/negativa e termina de forma eliptica ('com certeza vai dar') sem fechar a licao, fragmento incompleto e generico."
+  },
+  {
+    "id": "P3020716CxZv.dZx0PhX80W",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Insight tecnico replicavel e acionavel sobre como treinar comunicacao (praticar fora da camera, depois sozinho na camera, depois com uma pessoa), a tecnica concreta mais forte do lote."
+  },
+  {
+    "id": "P3020716CxZv.wFiNRv8KWV",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [
+      "gaguejo"
+    ],
+    "reason": "E um resumo/transicao vago ('corpo, postura e roupa se conectam') que so recapitula pontos ja ditos, sem exemplo ou insight novo."
+  },
+  {
+    "id": "P3020716CxZv.FgxoKgWdRs",
+    "approve": true,
+    "final_score": 52,
+    "content_flags": [],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Dica de carreira especifica sobre imagem profissional: evoluir o vestuario de casual pra formal de forma gradual em vez de abrupta, com cenario concreto (chinelo/bermuda no verao)."
+  },
+  {
+    "id": "P3020716CxZv.ErQgNjyIsb",
+    "approve": true,
+    "final_score": 50,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Dica pratica e especifica de comunicacao por video: olhar pra camera em vez de pra baixo transmite seguranca, ja que olhar pra baixo sinaliza vergonha/desconforto."
+  },
+  {
+    "id": "P3020716CxZv.hqwEHpZwgt",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": [
+      "incompleto",
+      "generico"
+    ],
+    "speech_flags": [
+      "pausas",
+      "repeticao"
+    ],
+    "reason": "Comeca retomando uma referencia nao estabelecida no proprio corte ('que vocês iriam pensar') e emenda com uma virada generica sobre 'ter intencao' na roupa, sem fechar uma ideia propria."
+  },
+  {
+    "id": "P3020716CxZv.iFil5g0HOp",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "incompleto",
+      "generico"
+    ],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "A reflexao sobre reclamar/positividade e cortada antes de aterrissar ('eu falo em micro-microcoisas' e para) e o argumento da Lei da Atracao fica generico sem exemplo proprio."
+  },
+  {
+    "id": "P3020716CxZv.pjNv0smdYX",
+    "approve": true,
+    "final_score": 54,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Traz um fato surpreendente e citavel (pesquisas apontam 3 segundos para formar uma impressao completa da pessoa), mesmo abrindo cortado no meio de uma frase anterior."
+  },
+  {
+    "id": "P3020716CxZv.Jo9F0lMDii",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Exemplos vividos e concretos (jantar de terno, casamento de moletom) ensinam de forma memoravel a calibrar roupa ao contexto e a mensagem que se quer passar."
+  },
+  {
+    "id": "P3020716CxZv.udZ3OjGgFa",
+    "approve": true,
+    "final_score": 61,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "repeticao"
+    ],
+    "reason": "Analogia original do 'dia do lixo' (cheat day emocional) conectada ao modelo pensamento-emocao-comportamento e um reframe interessante sobre regulacao emocional."
+  },
+  {
+    "id": "P3020716CxZv.HdqFlsTAvb",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": [
+      "incompleto",
+      "generico"
+    ],
+    "speech_flags": [
+      "pausas",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Emenda dois meios-pensamentos soltos (intencao no olhar e dress code) sem exemplo concreto em nenhum dos dois e sem fechar uma ideia unica."
+  },
+  {
+    "id": "P3020716CxZv.nw4Xxqav52",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": [],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Analogia relacionavel do dedo batido ('supera e vamo embora') com mensagem clara e fechada sobre nao deixar contratempos pequenos roubarem a produtividade do dia."
+  },
+  {
+    "id": "P3020716CxZv.TIatPxE0ze",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": [
+      "sem_payoff",
+      "incompleto"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "E a abertura/housekeeping da palestra (menciona slides, anotacoes, 'o que o Lessa mandou'), zero payoff de conteudo, tratado como abertura de palestra igual auto-apresentacao."
+  }
+]

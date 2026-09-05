@@ -1,0 +1,362 @@
+[
+  {
+    "id": "P3090317kaRt.gsfOrphXiJ",
+    "approve": true,
+    "final_score": 90,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Historia completa do incidente de DNS: montou a mudanca, saiu pra almocar, portal ficou instavel 6h no pico, e fecha com licao do que vale ou nao arriscar."
+  },
+  {
+    "id": "P3090317kaRt.JJqhz9ZGbV",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "gancho_fraco"],
+    "speech_flags": ["filler"],
+    "reason": "Reflexao generica sobre networking em evento; opiniao rasa sem insight ou licao concreta."
+  },
+  {
+    "id": "P3090317kaRt.keKVH2WR0v",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Curiosidade de bastidor de TV ao vivo: improviso quando o VT trava, com exemplo concreto; fecha o raciocinio."
+  },
+  {
+    "id": "P3090317kaRt.LhkeMaDJyb",
+    "approve": false,
+    "final_score": 48,
+    "content_flags": ["anedota_fraca", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Origem de carreira futebol vs tecnologia, mas anedota sem licao/insight claro alem de 'escolhi TI'."
+  },
+  {
+    "id": "P3090317kaRt.MoWMC4GM6j",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight tecnico/nostalgico: infra toda in-house com BIND, servidor de e-mail e antispam feitos na mao."
+  },
+  {
+    "id": "P3090317kaRt.ZdoQIB7nTm",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler", "gaguejo"],
+    "reason": "Insight tecnico dos pros e contras de microsservicos (bonus vs onus, data transfer), mas abre no meio de uma frase anterior."
+  },
+  {
+    "id": "P3090317kaRt.izs9RcGpj3",
+    "approve": true,
+    "final_score": 85,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Curiosidade tecnica forte: eram autonomous system com blocos de IP proprios e roteamento BGP; explica do comeco ao fim."
+  },
+  {
+    "id": "P3090317kaRt.wTTO4uDLUF",
+    "approve": true,
+    "final_score": 86,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Historia de origem no Linux completa: Debian, Tomcat, iptables, Zimbra, SVN, erros de jovem que viraram base pra evoluir."
+  },
+  {
+    "id": "P3090317kaRt.A7SGp9k5ho",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Pergunta do host sobre a virada on-premise pra cloud; sem conteudo de resposta."
+  },
+  {
+    "id": "P3090317kaRt.yuCYZb1o0A",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": ["incompleto", "generico"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Anedota relacional de creditar o host pela cert de Terraform; comeca como fragmento e o insight e raso."
+  },
+  {
+    "id": "P3090317kaRt.VM8WdybNgr",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler", "gaguejo", "pausas"],
+    "reason": "Curiosidade de bastidor da comunicacao em TV ao vivo, mas abre no meio falando de monitorar audiencia."
+  },
+  {
+    "id": "P3090317kaRt.hdlN5ORIZ1",
+    "approve": false,
+    "final_score": 38,
+    "content_flags": ["incompleto", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Ideia solta de estudar cloud antes da tendencia; muito curta e depende de contexto externo."
+  },
+  {
+    "id": "P3090317kaRt.2fxcNLX3Ob",
+    "approve": true,
+    "final_score": 82,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "repeticao"],
+    "reason": "Conselho acionavel de carreira: usar certificacao como meta de estudo, o valor esta no processo, nao no papel."
+  },
+  {
+    "id": "P3090317kaRt.3yp1TXwLEo",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler", "gaguejo", "pausas"],
+    "reason": "Conselho acionavel: sinalizar seu interesse pra que aparecam oportunidades; abre num fragmento anterior."
+  },
+  {
+    "id": "P3090317kaRt.A9zExaObno",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["generico", "gancho_fraco"],
+    "speech_flags": ["filler"],
+    "reason": "Anedota positiva generica de conhecer influencers via a marca; sem licao ou insight."
+  },
+  {
+    "id": "P3090317kaRt.lhFofC6NDM",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler"],
+    "reason": "Alerta real: responsabilidade de producao (25M acessos/mes) e diferente de lab; abre com 'mas' puxando a teoria."
+  },
+  {
+    "id": "P3090317kaRt.Wnc8Kk9uKx",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Conselho de carreira sobre certificacao como meta de estudo e boas praticas do Terraform; abre com fragmento."
+  },
+  {
+    "id": "P3090317kaRt.lbxGgC6eil",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": ["filler", "pausas"],
+    "reason": "Conteudo de lideranca: coordenar sendo hands-on, planejar com OKRs sem equipe pra implementar."
+  },
+  {
+    "id": "P3090317kaRt.djSiALTicw",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Insight tecnico pragmatico: usar Kubernetes so pra stack de monitoramento via Helm, nao pra apps de deploy constante."
+  },
+  {
+    "id": "P3090317kaRt.dBHXm6Hlf2",
+    "approve": true,
+    "final_score": 88,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Curiosidade tecnica: telefone INOC-DBA dava acesso direto a outros data centers, so pra quem era autonomous system."
+  },
+  {
+    "id": "P3090317kaRt.usOUtrNKrH",
+    "approve": false,
+    "final_score": 46,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Observacao generica de que a IA de imagem melhorou rapido; sem insight especifico."
+  },
+  {
+    "id": "P3090317kaRt.n6aH4PjvmT",
+    "approve": false,
+    "final_score": 44,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": ["filler"],
+    "reason": "Fragmento raso: ECS e estavel, sem problema, e termina anunciando 'a magia e louca' sem desenvolver."
+  },
+  {
+    "id": "P3090317kaRt.UFSv5fxRtR",
+    "approve": false,
+    "final_score": 38,
+    "content_flags": ["incompleto", "gancho_fraco"],
+    "speech_flags": ["gaguejo"],
+    "reason": "So provoca a historia da viagem (voo perdido) sem conta-la e emenda reflexao rasa de networking."
+  },
+  {
+    "id": "P3090317kaRt.qXN21uYtYb",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Insight de resiliencia por separar responsabilidades, mas anuncia 'os 2 lados' e corta antes de fechar o outro lado."
+  },
+  {
+    "id": "P3090317kaRt.OrtPmDFjQM",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": ["filler"],
+    "reason": "Linha de curriculo: onde trabalha hoje, 3 anos na Porter, full AWS; sem payoff."
+  },
+  {
+    "id": "P3090317kaRt.bP0shMljBv",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["filler"],
+    "reason": "Frase de efeito generica ('nao e onda, e tsunami') sobre IA, sem insight especifico."
+  },
+  {
+    "id": "P3090317kaRt.z62gftEcfx",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Argumento especifico e completo: novos empregos surgem, mas nao na mesma proporcao dos que a IA elimina."
+  },
+  {
+    "id": "P3090317kaRt.dGF4ePu6Kg",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Mensagem relacionavel com humor: IA fara tudo, mas nao quero ver robo jogando, quero ver meu Avai; fecha o ponto."
+  },
+  {
+    "id": "P3090317kaRt.bJQXlqnvnB",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": ["filler", "pausas", "gaguejo"],
+    "reason": "Reflexao de vida de pai, generica e sem licao/insight; slice-of-life."
+  },
+  {
+    "id": "P3090317kaRt.p8RopCyr35",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Mensagem relacionavel forte: o ciclo de querer desistir da TI e a alegria de resolver, com que todo mundo se identifica."
+  },
+  {
+    "id": "P3090317kaRt.YHYmHvfASK",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": ["anedota_fraca", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Anedota do primeiro estagio na Receita Federal; historia completa mas mundana, sem licao/surpresa."
+  },
+  {
+    "id": "P3090317kaRt.Xj2Szdj46S",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Opiniao generica de que a IA fara qualquer trabalho; premissa sem desenvolvimento ou insight."
+  },
+  {
+    "id": "P3090317kaRt.ieoN4pu5Og",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Conselho acionavel: escolha uma tecnologia/ferramenta, aprofunde e se especialize."
+  },
+  {
+    "id": "P3090317kaRt.5ytnUJrNc9",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["pausas"],
+    "reason": "Mensagem relacionavel com conviccao: criar o que a gente curte, nao o que viraliza; mas abre sem o objeto ('nunca comprou')."
+  },
+  {
+    "id": "P3090317kaRt.TAkKyhy5zQ",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": [],
+    "reason": "Anedota relacional de como contratou o Pantufa via indicacao; setup sem insight."
+  },
+  {
+    "id": "P3090317kaRt.VSZAnWDrdJ",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": ["filler", "pausas"],
+    "reason": "Humor genuino de TI: a camisa 'so faz backup quem nao se garante no soco' e a reacao de quem nao e da area."
+  },
+  {
+    "id": "P3090317kaRt.eQCitPa5Oa",
+    "approve": true,
+    "final_score": 86,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Historia completa com causa tecnica: teleprompter falhou ao vivo por acento/cedilha que o sistema nao aceitava."
+  },
+  {
+    "id": "P3090317kaRt.QHcW6pne2l",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Banter de dedicar o elogio a mae; sem payoff de conteudo."
+  },
+  {
+    "id": "P3090317kaRt.96tvVuwVgc",
+    "approve": false,
+    "final_score": 8,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "Agradecimento de encerramento; sem conteudo."
+  },
+  {
+    "id": "P3090317kaRt.kTqbht5CzN",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": ["filler"],
+    "reason": "Anedota fofa do filho gostar de futebol; sem licao/insight."
+  },
+  {
+    "id": "P3090317kaRt.DDDQWBVRda",
+    "approve": false,
+    "final_score": 48,
+    "content_flags": ["generico", "previsivel"],
+    "speech_flags": [],
+    "reason": "Take otimista e previsivel de que empregos mudam e nao acabam, como em revolucoes passadas; generico."
+  },
+  {
+    "id": "P3090317kaRt.Ejoa6gs74n",
+    "approve": false,
+    "final_score": 44,
+    "content_flags": ["generico", "gancho_fraco"],
+    "speech_flags": ["filler"],
+    "reason": "Observacao dispersa sobre gurus do digital e Instagram lotado que emenda elogio aos hosts; sem payoff firme."
+  },
+  {
+    "id": "P3090317kaRt.W6Oix5YCmA",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Insight especifico sobre video por IA: quem te conhece percebe pelos trejeitos, estranhos nao; abre com 'que por exemplo' puxando algo anterior."
+  },
+  {
+    "id": "P3090317kaRt.fR6aMcd4CN",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler", "gaguejo"],
+    "reason": "Licao relacionavel: erros de jovem no Linux foram fundamentais pra base; abre com banter e 'la' puxando empresa nao citada."
+  },
+  {
+    "id": "P3090317kaRt.g4WYByhcJn",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Reflexao relacionavel: a transicao sysadmin->DevOps foi natural, sem ponto de corte claro da nomenclatura."
+  }
+]

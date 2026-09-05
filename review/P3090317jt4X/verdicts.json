@@ -1,0 +1,507 @@
+[
+  {
+    "id": "P3090317jt4X.r5vmFhSQFn",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Alerta genuíno de carreira: iniciante que depende de IA pula fundamentos; sugere estudar arquitetura em livros."
+  },
+  {
+    "id": "P3090317jt4X.L64D3fwBXj",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "É a pergunta do host, sem conteúdo de payoff próprio."
+  },
+  {
+    "id": "P3090317jt4X.ZlOCxb16ll",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Conselho de carreira acionável: começar em empresas menores para ganhar contexto; crítica a banco/empregador não é concorrente de tech."
+  },
+  {
+    "id": "P3090317jt4X.cP3laoE3w6",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": [
+      "filler",
+      "pausas"
+    ],
+    "reason": "Virada de história com lição: tirou certificação AWS para comprovar papel de arquiteto."
+  },
+  {
+    "id": "P3090317jt4X.AKg6X87YZN",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": [
+      "incompleto",
+      "gancho_fraco"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Só monta a analogia do piloto de F1 e termina numa pergunta aberta, sem entregar o insight."
+  },
+  {
+    "id": "P3090317jt4X.VWjJOMQo47",
+    "approve": true,
+    "final_score": 82,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight técnico forte: não adotar ferramenta por hype, tecnologia é meio; pensar valor de negócio ao construir plataforma. Menções a Istio/Backstage são ressalva de uso, não crítica depreciativa."
+  },
+  {
+    "id": "P3090317jt4X.naGN4fvoab",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [],
+    "reason": "Insight técnico: escolher tecnologia pelo problema, não pelo hype (bazuca para matar formiguinha). Sem crítica depreciativa a marca nomeada."
+  },
+  {
+    "id": "P3090317jt4X.7zuBCb3Yde",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [],
+    "reason": "Opinião genérica de que o dev focar em negócio é bom, sem payoff concreto."
+  },
+  {
+    "id": "P3090317jt4X.kwmhvuo2eL",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Mensagem relacionável sobre devolver à comunidade e aprender ao palestrar (rever o assunto 2-3x)."
+  },
+  {
+    "id": "P3090317jt4X.DXPZmTFM6T",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": [
+      "anedota_fraca",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "Hobbies pessoais fora das telas, sem lição nem insight."
+  },
+  {
+    "id": "P3090317jt4X.mtIV2zku8g",
+    "approve": false,
+    "final_score": 38,
+    "content_flags": [
+      "sem_payoff",
+      "generico"
+    ],
+    "speech_flags": [],
+    "reason": "Descrição do dev dos anos 90 sem surpresa nem lição clara."
+  },
+  {
+    "id": "P3090317jt4X.dDQpOuwtQD",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Conselho acionável: seguir quem realmente constrói tecnologia; Musk/Zuckerberg não são concorrente/fornecedor de tech do canal."
+  },
+  {
+    "id": "P3090317jt4X.ohkWxtR6OU",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "Recap de carreira e cargo atual, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.zKpWUnJhSy",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "anedota_fraca",
+      "generico"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Reflexão vaga de que somos resolvedores de problemas, sem insight concreto."
+  },
+  {
+    "id": "P3090317jt4X.nx7YXwuChh",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Auto-apresentação biográfica sem virada surpreendente."
+  },
+  {
+    "id": "P3090317jt4X.C6anELRoIa",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": [
+      "generico"
+    ],
+    "speech_flags": [],
+    "reason": "Descreve o tema da palestra sem entregar o insight concreto (versão mais fraca do corte 6)."
+  },
+  {
+    "id": "P3090317jt4X.k9vpXJTO2S",
+    "approve": false,
+    "final_score": 32,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Só aponta que existe um paper Looking Glass para ler, sem entregar conteúdo."
+  },
+  {
+    "id": "P3090317jt4X.WnEv2JBtgZ",
+    "approve": false,
+    "final_score": 33,
+    "content_flags": [
+      "generico",
+      "anedota_fraca"
+    ],
+    "speech_flags": [],
+    "reason": "Biográfico sobre começar a palestrar, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.oZhCxfbCBJ",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": [
+      "generico"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Exortação genérica a entrar em comunidades, sem insight próprio."
+  },
+  {
+    "id": "P3090317jt4X.SdWaLEYCJ2",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": [
+      "filler",
+      "pausas"
+    ],
+    "reason": "Virada com lição: buscou certificação AWS Professional para comprovar papel; qualquer um com experiência pode opinar. [in/out consertado via API: fim estendido 3261.4s->3306.4s, verificado como história completa]"
+  },
+  {
+    "id": "P3090317jt4X.iHRkQdgzIb",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": [
+      "previsivel",
+      "generico"
+    ],
+    "speech_flags": [],
+    "reason": "Observação previsível de que plataformas de ensino melhoraram a UX com os anos."
+  },
+  {
+    "id": "P3090317jt4X.2tp7FqR1I8",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight/curiosidade técnica: Backstage foi aberto à comunidade para resolver adoção e passou a se sustentar com contribuições."
+  },
+  {
+    "id": "P3090317jt4X.ecwPPJlGRi",
+    "approve": false,
+    "final_score": 12,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Bloco de recados/CTA finais, sem substância."
+  },
+  {
+    "id": "P3090317jt4X.cGlJe0v4oS",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "generico",
+      "anedota_fraca"
+    ],
+    "speech_flags": [],
+    "reason": "Narração biográfica da primeira oportunidade na área comercial, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.NVJirC1rOv",
+    "approve": false,
+    "final_score": 38,
+    "content_flags": [
+      "anedota_fraca",
+      "generico"
+    ],
+    "speech_flags": [
+      "pausas",
+      "gaguejo"
+    ],
+    "reason": "Conta por que entrou em comunidades, sem lição acionável clara."
+  },
+  {
+    "id": "P3090317jt4X.oZZZeBkhJf",
+    "approve": false,
+    "final_score": 8,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "Despedida e cordialidades finais, sem conteúdo."
+  },
+  {
+    "id": "P3090317jt4X.m2W9WdGS5K",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": [
+      "generico",
+      "anedota_fraca"
+    ],
+    "speech_flags": [
+      "gaguejo"
+    ],
+    "reason": "Recap de como migrou para infra/cloud, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.0ob32vSD1h",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "filler"
+    ],
+    "reason": "Divagação circular sobre trabalhar com problemas, sem insight concreto."
+  },
+  {
+    "id": "P3090317jt4X.1I2Sc1KFde",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "Descreve o próprio jeito de estudar (POCs, sandbox, papers) de forma vaga, sem técnica replicável clara."
+  },
+  {
+    "id": "P3090317jt4X.eAeXyxGq6G",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": [
+      "anedota_fraca",
+      "sem_payoff"
+    ],
+    "speech_flags": [],
+    "reason": "Hobbies pessoais (boxe, shamisen, desenho), sem lição."
+  },
+  {
+    "id": "P3090317jt4X.d8kGsDi66t",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": [
+      "incompleto"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Fragmento que começa no meio da história da certificação, sem o contexto que dá sentido."
+  },
+  {
+    "id": "P3090317jt4X.IQyFjz2Tzq",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "pausas",
+      "filler"
+    ],
+    "reason": "Conversa promocional sobre um evento online e viagem à Romênia, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.oxpdkBNADR",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Dica acionável: usar plataformas de estudo e office hours com engenheiros do provedor (AWS) para se capacitar."
+  },
+  {
+    "id": "P3090317jt4X.7Q269mBsQ2",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Name-drop de Martin Fowler/Tech Radar sem entregar insight concreto para o ouvinte."
+  },
+  {
+    "id": "P3090317jt4X.PzplKWE5yp",
+    "approve": false,
+    "final_score": 44,
+    "content_flags": [
+      "anedota_fraca",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Anedota do 748/750 na prova, relatável mas sem lição ou insight."
+  },
+  {
+    "id": "P3090317jt4X.ex7bLQDAMl",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": [
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Conselho acionável: seguir experts/ambassadors específicos de Platform Engineering; menção a CodeCloud é positiva."
+  },
+  {
+    "id": "P3090317jt4X.fwSJ0rhNgy",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": [
+      "repeticao",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Insight: a maior parte das ferramentas de tech nasce de iniciativa comunitária, não privada; valor de estar na comunidade."
+  },
+  {
+    "id": "P3090317jt4X.G4bNiv4A54",
+    "approve": false,
+    "final_score": 18,
+    "content_flags": [
+      "anedota_fraca",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "filler"
+    ],
+    "reason": "Anedota pessoal de torneio de TCG, sem lição."
+  },
+  {
+    "id": "P3090317jt4X.W56UDrb1Tj",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Auto-apresentação curta, sem payoff."
+  },
+  {
+    "id": "P3090317jt4X.bQITAyGtor",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": [
+      "generico",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Platitude 'conhecimento é poder', sem conteúdo concreto."
+  },
+  {
+    "id": "P3090317jt4X.mV7D1tzigA",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Alerta/insight técnico: usar IA na infra (Vibe Coder) com guard rails e segurança para não expor dados sensíveis nem destruir recursos críticos."
+  },
+  {
+    "id": "P3090317jt4X.CFWeDgr51I",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": [
+      "generico"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Repete o tema de acompanhar CNCF/papers como ouvinte, sem insight próprio."
+  },
+  {
+    "id": "P3090317jt4X.BA2dED1zVc",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": [],
+    "speech_flags": [
+      "repeticao"
+    ],
+    "reason": "Curiosidade regional: Itaquaquecetuba/Arujá entre as cidades mais antigas de SP, Dom Pedro I passou pela região."
+  },
+  {
+    "id": "P3090317jt4X.qYZafzBlok",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": [
+      "incompleto",
+      "gancho_fraco"
+    ],
+    "speech_flags": [],
+    "reason": "Só introduz o tema de produto tangível/UX/roadmap, sem entregar payoff."
+  }
+]

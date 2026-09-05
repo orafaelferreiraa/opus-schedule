@@ -121,10 +121,10 @@ def build_schedule_plan(clips: list[dict], accounts: list[dict]) -> dict[str, li
 # Helpers
 # ---------------------------------------------------------------------------
 
-# Score de SUBSTÂNCIA DE CONTEÚDO (0-100) atribuído pela Judge LLM (gpt-5-mini)
-# no caminho de agendamento (function_app anexa `_content_score` a cada clip
-# quando a Judge roda em modo `hybrid`). É a melhor sinalização disponível de
-# viralidade real — julga payoff/insight/humor, não só duração ou fala limpa.
+# Score de SUBSTÂNCIA DE CONTEÚDO (0-100) vindo da curadoria local do Claude Code
+# (harness em `tools/curate/`, rubrica em `src/shared/curation_rubric.md`), anexado
+# como `_content_score` ao clip. É a melhor sinalização disponível de viralidade real —
+# julga payoff/insight/humor, não só duração ou fala limpa.
 _CONTENT_FIELDS = ("_content_score", "contentScore")
 
 # Campos de score de viralidade que a OpusClip pode retornar. O schema público

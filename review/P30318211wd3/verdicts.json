@@ -1,0 +1,276 @@
+[
+  {
+    "id": "P30318211wd3.PcSCeTXMQH",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": [
+      "repeticao",
+      "pausas",
+      "filler"
+    ],
+    "reason": "Dá um roteiro concreto de escuta ativa com o cônjuge (mini perguntas, parafrasear 'deixa eu ver se entendi') e fecha com o benefício claro de evitar conflito."
+  },
+  {
+    "id": "P30318211wd3.x8GV4CEvMV",
+    "approve": true,
+    "final_score": 85,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "pausas",
+      "filler"
+    ],
+    "reason": "Reúne o conceito de silêncio intencional, o termo 'escutatória' e o exemplo do cônjuge, fechando com a frase de efeito sobre comunicação; começa em 'Então', sinal de corte no meio."
+  },
+  {
+    "id": "P30318211wd3.WFPW9wpzNI",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": [
+      "gaguejo"
+    ],
+    "reason": "Usa a cena do Ross e Rachel em Friends como gancho de memória e fecha com dica prática de aperto de mão firme e olho no olho."
+  },
+  {
+    "id": "P30318211wd3.tl0JsWZqHe",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "filler",
+      "gaguejo"
+    ],
+    "reason": "Traz o conceito de rapport e o exemplo concreto do garçom que repete o nome do cliente; termina em gancho não resolvido ('mas aí tem um problema')."
+  },
+  {
+    "id": "P30318211wd3.r4h4hJStZN",
+    "approve": true,
+    "final_score": 75,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "repeticao",
+      "gaguejo"
+    ],
+    "reason": "Conselho de carreira concreto sobre pedir indicação/recomendação no LinkedIn: gere valor e confiança antes de pedir algo a quem não te conhece."
+  },
+  {
+    "id": "P30318211wd3.sLEnFIKbeM",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "repeticao",
+      "filler",
+      "gaguejo"
+    ],
+    "reason": "Traz hacks práticos para descobrir o nome de alguém sem perguntar diretamente (pedir LinkedIn, celular, pedir para soletrar)."
+  },
+  {
+    "id": "P30318211wd3.PmAjIS6CUt",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "gaguejo"
+    ],
+    "reason": "Ilustra com o exemplo do jornalista e do casal brigando como o silêncio comunica e acalma mais do que gritar."
+  },
+  {
+    "id": "P30318211wd3.rW3FUuNgD8",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": [
+      "generico"
+    ],
+    "speech_flags": [],
+    "reason": "Mensagem de mindset genérica (pensamento gera emoção gera comportamento) sem exemplo concreto que sustente o ponto."
+  },
+  {
+    "id": "P30318211wd3.bsLLeo4kw9",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "gaguejo"
+    ],
+    "reason": "Explica o framework dos 4 temperamentos e do DISC com aplicação prática (evitar colocar o perfil errado em helpdesk ou vendas)."
+  },
+  {
+    "id": "P30318211wd3.xjOpYqZkK4",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Técnica concreta: perceber quando você está sendo chato e injetar energia/intensidade na voz, com progressão prática de onde treinar isso."
+  },
+  {
+    "id": "P30318211wd3.QupKBvsu7l",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": [
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "pausas"
+    ],
+    "reason": "É o encerramento da palestra (agradecimentos, pedido de feedback, abraço), sem payoff de conteúdo."
+  },
+  {
+    "id": "P30318211wd3.yzPfIfsNjf",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Define o conceito de escuta ativa/'escutatória' mas fica na generalidade, sem técnica ou exemplo concreto dentro do próprio corte."
+  },
+  {
+    "id": "P30318211wd3.RxlAUcejVU",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": [
+      "generico",
+      "sem_insight"
+    ],
+    "speech_flags": [
+      "repeticao"
+    ],
+    "reason": "Afirmação genérica sobre 'comunicação com intenção' sem exemplo ou técnica que sustente o ponto."
+  },
+  {
+    "id": "P30318211wd3.CCqJ6fTcXJ",
+    "approve": true,
+    "final_score": 65,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "filler"
+    ],
+    "reason": "Insight sobre comunicação intercultural: ser entendido em inglês também depende de quem ouve, ilustrado com exemplo concreto de duas pessoas recebendo a mesma mensagem."
+  },
+  {
+    "id": "P30318211wd3.NlvHQXxaLc",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "pausas",
+      "gaguejo",
+      "filler"
+    ],
+    "reason": "Técnica de relacionamento: em vez de brigar sobre o celular, ajustar a própria energia de comunicação e usar isso como termômetro de melhora."
+  },
+  {
+    "id": "P30318211wd3.k0V4I5LMyU",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": [
+      "pausas",
+      "filler"
+    ],
+    "reason": "Técnica concreta de injetar entusiasmo na voz, ilustrada com o exemplo de dar uma notícia boa de emprego com emoção."
+  },
+  {
+    "id": "P30318211wd3.RgE8MDzunk",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Dica acionável e específica: repetir o nome da pessoa cria conexão porque é a primeira palavra que aprendemos a reconhecer como identidade."
+  },
+  {
+    "id": "P30318211wd3.fy5fpjsANN",
+    "approve": false,
+    "final_score": 12,
+    "content_flags": [
+      "incompleto"
+    ],
+    "speech_flags": [],
+    "reason": "Só anuncia o tema dos '4 temperamentos universais' sem chegar a explicar nenhum deles; corte incompleto."
+  },
+  {
+    "id": "P30318211wd3.NDwgui7Ulu",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": [
+      "incompleto",
+      "generico"
+    ],
+    "speech_flags": [
+      "pausas",
+      "gaguejo"
+    ],
+    "reason": "Fica na generalidade de 'ter autoconhecimento' e termina de forma confusa, sem técnica clara de como treinar isso."
+  },
+  {
+    "id": "P30318211wd3.dRTB5Z1tq2",
+    "approve": false,
+    "final_score": 18,
+    "content_flags": [
+      "incompleto"
+    ],
+    "speech_flags": [
+      "pausas",
+      "filler"
+    ],
+    "reason": "Apenas define o termo 'rapport' e corta exatamente quando o exemplo prático ia começar."
+  },
+  {
+    "id": "P30318211wd3.D1ZvQoacny",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [
+      "corte_no_meio"
+    ],
+    "speech_flags": [
+      "pausas",
+      "filler"
+    ],
+    "reason": "Alerta concreto e quantificado (4-5h ou 2-3 dias) sobre como esquecer o nome de alguém quebra totalmente a conexão profissional."
+  },
+  {
+    "id": "P30318211wd3.wsFG7obB4U",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": [
+      "incompleto",
+      "sem_payoff"
+    ],
+    "speech_flags": [
+      "pausas"
+    ],
+    "reason": "Só monta o cenário da distração online (5 telas) sem chegar à solução; corte incompleto."
+  },
+  {
+    "id": "P30318211wd3.IOSfIlHInO",
+    "approve": true,
+    "final_score": 63,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Conselho de carreira concreto sobre indicação no LinkedIn: construir confiança e mostrar valor antes de pedir para ser indicado."
+  }
+]

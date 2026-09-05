@@ -1,26 +1,14 @@
-import json
-
-from shared.judge import JudgeSettings, _build_auth_headers, _safe_json, _run_hard_rules
+from shared.judge import JudgeSettings, _run_hard_rules, judge_clips, summarize_judge
 
 
-def test_safe_json_parses_expected_contract():
-    payload = {
-        "final_score": 77,
-        "soft_signals": {
-            "rhythm": 70,
-            "clarity": 75,
-            "context": 80,
-            "engagement": 78,
-            "pauses": 65,
-        },
-        "audit_reason": "Clip coeso com ritmo moderado.",
+def _good_clip() -> dict:
+    return {
+        "id": "P1.C1",
+        "projectId": "P1",
+        "title": "Título com substância suficiente",
+        "description": "descrição",
+        "durationMs": 45000,
     }
-
-    parsed = _safe_json(json.dumps(payload))
-
-    assert parsed["final_score"] == 77
-    assert parsed["soft_signals"]["clarity"] == 75
-    assert "coeso" in parsed["audit_reason"]
 
 
 def test_hard_rules_reject_short_duration_and_weak_text():
@@ -39,19 +27,44 @@ def test_hard_rules_reject_short_duration_and_weak_text():
     assert "text_too_short" in reasons
 
 
-def test_judge_settings_defaults_to_api_key_auth_mode_when_missing_env(monkeypatch):
-    monkeypatch.delenv("JUDGE_AUTH_MODE", raising=False)
+def test_rules_only_approves_clip_passing_hard_rules():
+    settings = JudgeSettings.from_request({"judge_mode": "rules_only"})
 
+    [result] = judge_clips([_good_clip()], settings)
+
+    assert result["decision"] == "APPROVE"
+    assert result["final_score"] == 100
+    assert result["source"] == "rules_only"
+
+
+def test_rules_only_rejects_clip_failing_hard_rules():
+    settings = JudgeSettings.from_request({"judge_mode": "rules_only"})
+    clip = {**_good_clip(), "durationMs": 1000, "title": "", "description": ""}
+
+    [result] = judge_clips([clip], settings)
+
+    assert result["decision"] == "REJECT"
+    assert result["source"] == "rules_only"
+    assert result["hard_fail_reasons"]
+
+
+def test_off_mode_approves_without_evaluating():
     settings = JudgeSettings.from_request({"judge_mode": "off"})
 
-    assert settings.auth_mode == "api_key"
+    [result] = judge_clips([_good_clip()], settings)
+
+    assert result["decision"] == "APPROVE"
+    assert result["source"] == "disabled"
 
 
-def test_build_auth_headers_uses_api_key(monkeypatch):
-    monkeypatch.setenv("JUDGE_AZURE_OPENAI_API_KEY", "k-test")
+def test_summarize_counts_decisions_and_sources():
+    settings = JudgeSettings.from_request({"judge_mode": "rules_only"})
+    good = _good_clip()
+    bad = {**_good_clip(), "id": "P1.C2", "durationMs": 1000, "title": "", "description": ""}
 
-    settings = JudgeSettings.from_request({"judge_mode": "off"})
-    headers = _build_auth_headers(settings)
+    summary = summarize_judge(judge_clips([good, bad], settings))
 
-    assert headers["api-key"] == "k-test"
-    assert headers["Content-Type"] == "application/json"
+    assert summary["total"] == 2
+    assert summary["approved"] == 1
+    assert summary["rejected"] == 1
+    assert summary["source_rules_only"] == 2

@@ -34,11 +34,6 @@ data "azurerm_communication_service" "shared" {
   resource_group_name = var.shared_resource_group_name
 }
 
-data "azurerm_cognitive_account" "shared_foundry" {
-  name                = var.shared_foundry_name
-  resource_group_name = var.shared_resource_group_name
-}
-
 # ---------------------------------------------------------------------------
 # Recursos próprios deste stack (isolados em RG dedicado).
 # ---------------------------------------------------------------------------
@@ -104,19 +99,11 @@ resource "azurerm_function_app_flex_consumption" "lowopscast" {
     STATE_TABLE_NAME                = var.state_table_name
     STATE_STORAGE_CONNECTION_STRING = data.azurerm_storage_account.shared.primary_connection_string
 
-    # Judge — dormente (rules_only). Endpoint aponta para o Foundry existente
-    # para habilitar o modo hybrid depois, sem provisionar nada novo.
+    # Judge no cloud = só gate mecânico (rules_only). A curadoria de CONTEÚDO
+    # (payoff/insight) é feita localmente pelo Claude Code via o harness em
+    # tools/curate/ — o Azure AI Foundry foi removido deste stack.
     JUDGE_MODE                      = "rules_only"
-    JUDGE_PROVIDER                  = "foundry"
-    JUDGE_AUTH_MODE                 = var.judge_auth_mode
-    JUDGE_AZURE_OPENAI_ENDPOINT     = data.azurerm_cognitive_account.shared_foundry.endpoint
-    JUDGE_MODEL_DEPLOYMENT_PRIMARY  = var.judge_primary_model
-    JUDGE_MODEL_DEPLOYMENT_FALLBACK = var.judge_fallback_model
-    JUDGE_API_VERSION               = "2024-12-01-preview"
-    JUDGE_THRESHOLD                 = "70"
     JUDGE_INCLUDE_REVIEW_IN_DRY_RUN = "true"
-    JUDGE_TIMEOUT_MS                = "12000"
-    JUDGE_MAX_RETRIES               = "2"
   }
 
   identity {
@@ -124,12 +111,4 @@ resource "azurerm_function_app_flex_consumption" "lowopscast" {
   }
 
   tags = local.common_tags
-}
-
-# Permite ao Judge (modo hybrid / analyze-library use_llm) chamar o gpt-5-mini
-# do Foundry compartilhado via managed identity.
-resource "azurerm_role_assignment" "function_foundry" {
-  scope                = data.azurerm_cognitive_account.shared_foundry.id
-  role_definition_name = "Cognitive Services OpenAI User"
-  principal_id         = azurerm_function_app_flex_consumption.lowopscast.identity[0].principal_id
 }

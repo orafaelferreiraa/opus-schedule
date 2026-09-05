@@ -1,0 +1,306 @@
+[
+  {
+    "id": "P3020412QRU9.ijE8BAY56a",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Anuncio de troca de organizacao de comunidade local (Floripa Gophers); historia completa mas sem payoff que prenda um estranho."
+  },
+  {
+    "id": "P3020412QRU9.0wzdCF2TMA",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff", "generico", "gancho_fraco"],
+    "speech_flags": ["repeticao", "filler"],
+    "reason": "Abertura e apresentacao do convidado pelo host; auto-apresentacao sem substancia de conteudo."
+  },
+  {
+    "id": "P3020412QRU9.OKMqjC88Wd",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["repeticao"],
+    "reason": "Recado generico de 'usar e abusar da IA' sem tecnica concreta ou licao; comeca no meio."
+  },
+  {
+    "id": "P3020412QRU9.rvzREPdINR",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["anedota_fraca", "generico"],
+    "speech_flags": [],
+    "reason": "Anedota pessoal sobre palestrar em dupla mais recomendacao de comunidade, sem licao clara."
+  },
+  {
+    "id": "P3020412QRU9.DIQzCPP0F9",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Relato de logistica de evento e agendamento sem insight ou licao; conversa solta."
+  },
+  {
+    "id": "P3020412QRU9.cuu3SfeGYh",
+    "approve": false,
+    "final_score": 42,
+    "content_flags": ["generico", "fora_do_tema"],
+    "speech_flags": ["repeticao"],
+    "reason": "Descricao promocional do evento Global Azure; informativo mas sem gancho ou licao que prenda um estranho."
+  },
+  {
+    "id": "P3020412QRU9.B91NjlyOFm",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": ["repeticao"],
+    "reason": "Relato pessoal disperso sobre entrar em comunidades, sem licao objetiva."
+  },
+  {
+    "id": "P3020412QRU9.RKdwXNy2Z7",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "fora_do_tema"],
+    "speech_flags": ["repeticao", "pausas"],
+    "reason": "Chamada promocional para iniciativa e podcast proprios; sem payoff de conteudo."
+  },
+  {
+    "id": "P3020412QRU9.0Bt3tromHG",
+    "approve": true,
+    "final_score": 82,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Conselho acionavel de carreira: montar portfolio com IA e contornar NDA gerando codigo novo; raciocinio completo."
+  },
+  {
+    "id": "P3020412QRU9.zf9dmjQ9hN",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight tecnico: DevOps nao some com IA e explicacao do conceito de engenheiro de plataforma (tirar friccao do dev)."
+  },
+  {
+    "id": "P3020412QRU9.5ftWGxCGcH",
+    "approve": false,
+    "final_score": 40,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Depoimento generico de paixao pelo trabalho, sem insight ou virada."
+  },
+  {
+    "id": "P3020412QRU9.RD8bhCt7Ra",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Conselho de carreira acionavel: mercado exigente, 'nao existe DevOps junior', comece a se aplicar ja no primeiro semestre."
+  },
+  {
+    "id": "P3020412QRU9.Fs8w5nUv8U",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao", "gaguejo", "pausas"],
+    "reason": "Trilha de certificacoes (fundamentos a associate a professional) e recomendacao de comecar pelo Fundamentos; termina cortado."
+  },
+  {
+    "id": "P3020412QRU9.FNqqgtvl7e",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Fato concreto: 12 certificacoes Microsoft (~R$7 mil) e como certificacao pesa entre dois candidatos."
+  },
+  {
+    "id": "P3020412QRU9.MhTDrEAHQv",
+    "approve": true,
+    "final_score": 75,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Virada biografica com licao: focar so em Azure (nicho) o diferenciou num mercado dominado por AWS/Kubernetes."
+  },
+  {
+    "id": "P3020412QRU9.lKJlQQUsOg",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Licao de carreira: nichar em Azure o tornou referencia e o diferenciou; recado claro sobre especializacao."
+  },
+  {
+    "id": "P3020412QRU9.czNVb0kSs9",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": ["pausas"],
+    "reason": "Insight de arquiteto: nao precisa saber tudo no detalhe, mas entender o funcionamento e qual servico atende, apoiado em doc/IA."
+  },
+  {
+    "id": "P3020412QRU9.g9DiJGacZc",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": [],
+    "reason": "Tecnica de compartilhar caso real de seguranca de forma anonimizada/maquiada sem violar sigilo; comeca no meio."
+  },
+  {
+    "id": "P3020412QRU9.73mpqk05CD",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["generico", "incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "Frase-conceito generica ('mare sobe, barco sobe') curta e cortada no fim, sem payoff."
+  },
+  {
+    "id": "P3020412QRU9.nZR5ckrMFu",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": [],
+    "reason": "Vinheta de abertura do programa; auto-apresentacao sem conteudo."
+  },
+  {
+    "id": "P3020412QRU9.7ufIuaQoTC",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Alerta real: decisoes de arquitetura pelo hype/CV inflam custo e complexidade; historia completa com o ponto fechando."
+  },
+  {
+    "id": "P3020412QRU9.1weNPSco5k",
+    "approve": false,
+    "final_score": 38,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": ["repeticao", "gaguejo", "pausas"],
+    "reason": "Relato biografico disperso da migracao pra cloud/DevOps, sem licao clara."
+  },
+  {
+    "id": "P3020412QRU9.UZJtE1CGLk",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": ["generico", "gancho_fraco"],
+    "speech_flags": ["filler"],
+    "reason": "Host expoe o problema da falta de portfolio mas nao entrega a solucao; enquadramento sem payoff."
+  },
+  {
+    "id": "P3020412QRU9.UmW6zJm5lX",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler"],
+    "reason": "Mensagem relacionavel: tirar a CNH nao e saber dirigir; maestria vem com tempo e 10 mil horas; continua a fala anterior."
+  },
+  {
+    "id": "P3020412QRU9.KATUv3fK7D",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["incompleto", "sem_payoff", "gancho_fraco"],
+    "speech_flags": ["repeticao"],
+    "reason": "Pergunta do host sobre os diferenciais da Azure; a resposta nao esta no corte."
+  },
+  {
+    "id": "P3020412QRU9.K4kpraWHtx",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler"],
+    "reason": "Mensagem sobre a importancia do fundamento com boa analogia de treino de futebol; puxa contexto anterior."
+  },
+  {
+    "id": "P3020412QRU9.QkqiPbYfJT",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["repeticao", "pausas"],
+    "reason": "Observacao rasa de que processos permitem circular por comunidades; sem tecnica ou licao concreta."
+  },
+  {
+    "id": "P3020412QRU9.2SzeOuvnoC",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["pausas"],
+    "reason": "Insight tecnico: vendor lock-in explicado (quanto mais servicos especificos, mais preso) com alerta de cuidado; comeca no meio."
+  },
+  {
+    "id": "P3020412QRU9.jkvNH2D7OH",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight honesto: certificacao prova que voce estudou/passou, nao a habilidade (analogia CNH/piloto); no fim emenda outro tema."
+  },
+  {
+    "id": "P3020412QRU9.hMWp6n9xcj",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight tecnico: Kubernetes nao elimina complexidade - identidade, seguranca e governanca seguem embaixo; abre referenciando contexto anterior."
+  },
+  {
+    "id": "P3020412QRU9.9DdNJXxVOl",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Dica acionavel: documentar continuamente eventos/impacto/URLs para a renovacao anual do Microsoft MVP."
+  },
+  {
+    "id": "P3020412QRU9.iaP5zX5kCw",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "fora_do_tema"],
+    "speech_flags": [],
+    "reason": "Agradecimento e novidades de evento (DevOps Days/Besides); sem payoff de conteudo."
+  },
+  {
+    "id": "P3020412QRU9.KOBLDEK83D",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight de consultoria: casar solucao ao problema e evitar over-engineering ('nao por um canhao'/Kubernetes so por hype); minimalismo que roda."
+  },
+  {
+    "id": "P3020412QRU9.4jWfVByCvn",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Mensagem inspiracional com conviccao: proposito de impactar uma vida acima de fama/dinheiro, com o relatable 'mas voce trabalha?'."
+  },
+  {
+    "id": "P3020412QRU9.S5eCOo7gWT",
+    "approve": false,
+    "final_score": 45,
+    "content_flags": ["fora_do_tema", "anedota_fraca"],
+    "speech_flags": [],
+    "reason": "Anedota domestica sobre montar estudio em casa; simpatica mas fora dos payoffs (nao e humor de rotina de TI/DevOps)."
+  },
+  {
+    "id": "P3020412QRU9.eoyEdKRd0H",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["fora_do_tema", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Piada interna sobre participante nomeado de eventos locais; sem payoff para um estranho."
+  },
+  {
+    "id": "P3020412QRU9.FFqDZutA5q",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["sem_payoff", "anedota_fraca"],
+    "speech_flags": ["pausas"],
+    "reason": "Host confessa nunca ter conseguido organizar as palestras; nao entrega dica apesar do titulo, sem payoff."
+  },
+  {
+    "id": "P3020412QRU9.loO5dMySRO",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["anedota_fraca", "generico"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Lista generica de hobbies/familia fora da tech; sem licao, surpresa ou insight."
+  }
+]

@@ -1,0 +1,314 @@
+[
+  {
+    "id": "P3090317f12p.W0CEl1C0pq",
+    "approve": true,
+    "final_score": 76,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight completo sobre a IA mudando o mercado agora, fecha com definição clara do dev que o mercado quer (decidir, orquestrar agentes, responder pelo que a IA não resolve)."
+  },
+  {
+    "id": "P3090317f12p.O5uZ0PXLgZ",
+    "approve": true,
+    "final_score": 46,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["filler"],
+    "reason": "Conselho técnico prático de uso de IA: usar pra brainstorm mas manter a decisão arquitetural com o humano, dica replicável no dia a dia."
+  },
+  {
+    "id": "P3090317f12p.daIy8VG2p0",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Conselho de carreira acionável sobre mostrar impacto e visibilidade no trabalho remoto para justificar aumento/promoção."
+  },
+  {
+    "id": "P3090317f12p.IR5B4pEOLe",
+    "approve": true,
+    "final_score": 54,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Insight técnico específico e completo sobre a diferença de custo entre VM sempre ligada e serverless pago por execução, com exemplo (Lambda)."
+  },
+  {
+    "id": "P3090317f12p.SWOIKp3jEL",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": ["sem_insight", "generico"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Descreve obrigações de ser MEI (INSS, contabilidade) mas não fecha em conselho ou lição de carreira clara, fica na descrição."
+  },
+  {
+    "id": "P3090317f12p.My5kJz6dgQ",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Afirmação genérica de 'nuvem é poder infinito, cuidado com o cartão' sem exemplo concreto ou técnica que sustente o corte sozinho."
+  },
+  {
+    "id": "P3090317f12p.bQkTpvCxXA",
+    "approve": true,
+    "final_score": 50,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Insight técnico específico: por que deploy via container é melhor prática, cita ECS e Azure Container Apps e automação via GitOps."
+  },
+  {
+    "id": "P3090317f12p.vitYyFRqVb",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Conselho de carreira concreto: dominar os cloud providers aproxima do papel de arquiteto, com as variações do cargo (cloud/infra/software)."
+  },
+  {
+    "id": "P3090317f12p.dGbBcbxMGf",
+    "approve": true,
+    "final_score": 88,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Roteiro de carreira completo e concreto de júnior a staff: documentar, quantificar impacto, pedir mais trabalho, ownership, com exemplos práticos de fala."
+  },
+  {
+    "id": "P3090317f12p.sb0jyQ1Js9",
+    "approve": true,
+    "final_score": 84,
+    "content_flags": [],
+    "speech_flags": ["pausas"],
+    "reason": "Técnica prática replicável e específica: usar free tiers/trials de cada cloud (com prazos reais) para ganhar experiência e ter histórias pra entrevista."
+  },
+  {
+    "id": "P3090317f12p.mId3HgqF9O",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["sem_insight", "generico"],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Menciona autoscaling na Black Friday mas não explica como, fecha só com 'a magia acontece', sem substância técnica."
+  },
+  {
+    "id": "P3090317f12p.FSYvzDIZ1K",
+    "approve": true,
+    "final_score": 55,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Fato interessante (migrações em massa na pandemia e na guerra da Ucrânia) seguido de explicação concreta dos caminhos de modernização na nuvem."
+  },
+  {
+    "id": "P3090317f12p.NOJ3rAseoj",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Conselho de carreira com convicção: ser o melhor do time é sinal de alerta, trocar de time pra continuar crescendo tecnicamente."
+  },
+  {
+    "id": "P3090317f12p.emyGj4RkPF",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "História completa e didática: notebook virando servidor da empresa até bater limite, resolvida pela elasticidade da nuvem, analogia concreta para iniciante."
+  },
+  {
+    "id": "P3090317f12p.08wAXYxp68",
+    "approve": true,
+    "final_score": 56,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Explica landing zones com analogia completa (casa/cômodos) e fecha ligando ao porte de bancos e big techs que precisam de governança."
+  },
+  {
+    "id": "P3090317f12p.6e38iE2pjb",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "História com virada inesperada e lição clara: tiraram do time quem 'não performava' e o time todo piorou, lição sobre equilíbrio entre ajudar e entregar."
+  },
+  {
+    "id": "P3090317f12p.82sTJkOzKw",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Mensagem de conforto sobre inglês ('só se comunicar já basta') sem técnica ou exemplo concreto, fica genérica."
+  },
+  {
+    "id": "P3090317f12p.wnaAISCItI",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["incompleto"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Explica o fim do 'na minha máquina funciona' mas a pergunta sobre container vs serverless termina num 'depende' sem desenvolver, não fecha."
+  },
+  {
+    "id": "P3090317f12p.EtSpM9qyIz",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["incompleto"],
+    "speech_flags": [],
+    "reason": "Versão curta da analogia de landing zones que corta antes de fechar a ligação de volta com o conceito, incompleta."
+  },
+  {
+    "id": "P3090317f12p.UNuJmOeqn9",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Explica FinOps com exemplo prático de rightsizing e autoscaling (inclui Black Friday) e humor leve (Julio César), fecha o raciocínio."
+  },
+  {
+    "id": "P3090317f12p.Kw2DpcOP0D",
+    "approve": false,
+    "final_score": 27,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Reafirma que VM superdimensionada é problema de FinOps mas sem técnica nova além do já dito, raso."
+  },
+  {
+    "id": "P3090317f12p.T2eeVKpHft",
+    "approve": true,
+    "final_score": 52,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Técnica concreta: usar observabilidade/métricas/logs para validar se o dimensionamento do banco de dados está correto, com humor leve (Julio César)."
+  },
+  {
+    "id": "P3090317f12p.XZ4gYoMypo",
+    "approve": false,
+    "final_score": 24,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Promete guia rápido de SQL vs NoSQL mas só lista nomes de tecnologias sem dar critério de escolha, não entrega o payoff do próprio título."
+  },
+  {
+    "id": "P3090317f12p.MYpC8TyZoi",
+    "approve": false,
+    "final_score": 26,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Explica necessidade de governança em escala mas fica no nível de definição básica de least privilege, sem exemplo que surpreenda."
+  },
+  {
+    "id": "P3090317f12p.7nj6ONNgic",
+    "approve": false,
+    "final_score": 18,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Afirma que monitoramento evita surpresas mas não dá nenhuma técnica, ferramenta ou exemplo, puramente genérico."
+  },
+  {
+    "id": "P3090317f12p.jEhXMGyXon",
+    "approve": true,
+    "final_score": 48,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Insight técnico específico e atual: NGINX depreciado como ingress, substituição pelo Gateway API nativo do Kubernetes via Argo CD."
+  },
+  {
+    "id": "P3090317f12p.inVyQbwFHN",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["incompleto"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Monta a situação do notebook virando servidor até bater limite mas corta antes da resolução/lição (que só aparece em outro corte), incompleto."
+  },
+  {
+    "id": "P3090317f12p.EyU2Y0m7DD",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Fala de hábito pessoal de ouvir podcast (inclusive o próprio) no trajeto, mais autopromoção do que insight de carreira substancial."
+  },
+  {
+    "id": "P3090317f12p.wFDSqhDoDe",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["gaguejo"],
+    "reason": "É essencialmente propaganda do próprio curso de Cloud Computing, sem ensinar um conceito específico dentro do corte."
+  },
+  {
+    "id": "P3090317f12p.aLHrwSa5Lh",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": ["incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "Reflexão de outro convidado que depende de contexto externo (nomes, live anterior sobre LinkedIn com RH) não explicado no corte."
+  },
+  {
+    "id": "P3090317f12p.d7Jpit6Tjo",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Insight concreto sobre decisão de arquitetura: escolher a tecnologia pelo que o time sabe, com analogia (batata quente) e exemplo (time Java em projeto Python/C#)."
+  },
+  {
+    "id": "P3090317f12p.Lkx2L58M8l",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["anedota_fraca", "generico"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Anedota pessoal fraca sobre trabalhar remoto pros EUA, sem lição ou fato realmente surpreendente."
+  },
+  {
+    "id": "P3090317f12p.MXTNZjUHeP",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Explica as 4 opções de balanceamento de carga no Azure (Load Balancer, App Gateway, Traffic Manager, Front Door) com critério de quando usar cada uma."
+  },
+  {
+    "id": "P3090317f12p.i4kW80GHkW",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff"],
+    "speech_flags": ["gaguejo"],
+    "reason": "É só um convite pra plateia comentar o que está estudando, sem conteúdo próprio."
+  },
+  {
+    "id": "P3090317f12p.2dtdNZE1uS",
+    "approve": false,
+    "final_score": 12,
+    "content_flags": ["sem_payoff"],
+    "speech_flags": [],
+    "reason": "Transição pra sessão de perguntas, sem conteúdo substantivo, só abre o próximo bloco."
+  },
+  {
+    "id": "P3090317f12p.OnQYmeUzpp",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Fato técnico atual e específico: depreciação do NGINX como ingress controller e migração pro Gateway API, com contexto do papel de platform engineer."
+  },
+  {
+    "id": "P3090317f12p.ETfjvjcQ20",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "É só a pergunta feita ao palestrante ('quais os primeiros passos em cloud'), sem a resposta, sem payoff."
+  },
+  {
+    "id": "P3090317f12p.rKDMtUjvup",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Define IaaS/PaaS/SaaS de forma rasa, sem exemplo ou aprofundamento, glossário básico."
+  },
+  {
+    "id": "P3090317f12p.9TBn5hiuQ0",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["sem_payoff"],
+    "speech_flags": [],
+    "reason": "Abertura da palestra e apresentação do convidado, sem conteúdo, tratado como abertura incompleta."
+  }
+]

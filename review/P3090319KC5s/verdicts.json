@@ -1,0 +1,258 @@
+[
+  {
+    "id": "P3090319KC5s.obSc4axhT9",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Depoimento externo concreto: a documentação/portfólio do Rafael evitou gasto de R$100 mil numa petição, com conselho de carreira claro (documentar tudo, manter certificados)."
+  },
+  {
+    "id": "P3090319KC5s.gEFA7YWTAT",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "História completa de incidente técnico (exclusão acidental do state) resolvida graças a IaC, com lição de replicabilidade para ambientes enterprise."
+  },
+  {
+    "id": "P3090319KC5s.WCYZB0uSRu",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Insight sobre a velocidade de obsolescência de cargos ligados a IA (Prompt Engineer virou Loop Engineer) com prática pessoal de atualização e provocação final de carreira."
+  },
+  {
+    "id": "P3090319KC5s.dOVuBimjCC",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Opinião direta e bem-humorada e completa sobre o papel da IA no emprego do dev: hoje se paga para resolver problemas, não para escrever código."
+  },
+  {
+    "id": "P3090319KC5s.neKRK4tWF5",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["incompleto", "gancho_fraco"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Corte longo e disperso que mistura framing filosófico com a narrativa do site e termina num gancho não pago (conta do ChatGPT), sem fechar um raciocínio."
+  },
+  {
+    "id": "P3090319KC5s.ksCZNybgqt",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight técnico específico sobre como o conhecimento do usuário limita o que a IA constrói, com números concretos (55 vs. 200 tecnologias)."
+  },
+  {
+    "id": "P3090319KC5s.VY1xuKgOXK",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Técnica prática replicável: pedir para a própria IA gerar o prompt bem desenhado usando seus dados, com exemplo concreto do resultado obtido."
+  },
+  {
+    "id": "P3090319KC5s.hlsMzySvAD",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Conselho de carreira acionável e completo sobre o profissional em T (especialização forte + generalismo), com exemplo pessoal concreto."
+  },
+  {
+    "id": "P3090319KC5s.ko2FhuwDpY",
+    "approve": true,
+    "final_score": 65,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Insight técnico específico e atual sobre Generative Engine Optimization (indexação de conteúdo em LLMs), explicado com exemplo claro."
+  },
+  {
+    "id": "P3090319KC5s.qXNzfycVNJ",
+    "approve": true,
+    "final_score": 55,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Abre de forma abrupta mas fecha o raciocínio: decisão de não pagar agência cara e usar GitHub Pages/Jekyll gratuito como alternativa prática."
+  },
+  {
+    "id": "P3090319KC5s.7WggqlnWmx",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Insight técnico denso sobre cloud native, portabilidade via Kubernetes e estrutura de time de segurança; abre com 'por isso' sem antecedente mas o conteúdo se sustenta."
+  },
+  {
+    "id": "P3090319KC5s.t66mAEF9RT",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Framing genérico de que a palestra traz perguntas e não respostas, sem exemplo concreto ou insight aplicável."
+  },
+  {
+    "id": "P3090319KC5s.q8UxDJyM1x",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "É a chamada dos palestrantes ao palco pelo mestre de cerimônias, sem nenhum conteúdo substantivo — equivale a abertura de palestra."
+  },
+  {
+    "id": "P3090319KC5s.I2TvxEkn9t",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["sem_insight", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Lista de tecnologias e features do site sem explicar como ou por que, ficando raso demais para ensinar algo a um estranho."
+  },
+  {
+    "id": "P3090319KC5s.9adBLERRge",
+    "approve": true,
+    "final_score": 73,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight técnico prático e atual: usar duas ferramentas de IA como redundância e o conceito de 'Loop Engineer' com sessão de 2h ininterruptas."
+  },
+  {
+    "id": "P3090319KC5s.UZCIWiwHdl",
+    "approve": false,
+    "final_score": 28,
+    "content_flags": ["generico", "gancho_fraco"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Mensagem genérica sobre criar conteúdo e marca pessoal que se dispersa e não aterrissa em um ponto concreto."
+  },
+  {
+    "id": "P3090319KC5s.tGs1vUmNBz",
+    "approve": true,
+    "final_score": 75,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Explicação técnica completa e específica de como autorizar o GitHub Actions a fazer deploy na Azure via Service Principal e Secrets."
+  },
+  {
+    "id": "P3090319KC5s.r7eX3h1dSC",
+    "approve": false,
+    "final_score": 32,
+    "content_flags": ["sem_insight", "incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "Menção rasa a Checkov/Trivy seguida de encerramento de palestra (agradecimentos e perguntas), sem desenvolver o insight técnico."
+  },
+  {
+    "id": "P3090319KC5s.tL3XQUFJYa",
+    "approve": true,
+    "final_score": 71,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Explicação técnica concreta da escolha do Azure Static Web App (grátis, serverless) com domínio e DNS como infraestrutura como código e CI/CD."
+  },
+  {
+    "id": "P3090319KC5s.thdqVzuqBT",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Mensagem inspiracional curta e completa: o limite é o próprio conhecimento, não a IA, fechando com provocação sobre satisfação no trabalho."
+  },
+  {
+    "id": "P3090319KC5s.X9K84EvbRR",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Introdução da palestra (agradecimento por serem backup e apresentação do tema), sem conteúdo substantivo — equivale a abertura de palestra."
+  },
+  {
+    "id": "P3090319KC5s.ai9xpgLUEp",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Insight de DevSecOps sobre shift left vs. shift right respondendo a uma objeção real de quem já subiu sem focar em segurança."
+  },
+  {
+    "id": "P3090319KC5s.je9CRvOgTY",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["sem_payoff", "incompleto"],
+    "speech_flags": ["repeticao", "filler"],
+    "reason": "Descreve apenas que criou um prompt simples e levou para outra ferramenta, sem chegar à técnica ou lição que dá sentido ao corte."
+  },
+  {
+    "id": "P3090319KC5s.EVXOPFKrdK",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Versão enxuta e completa do incidente do state excluído, com lição clara de replicabilidade via IaC para ambientes de teste/QA."
+  },
+  {
+    "id": "P3090319KC5s.ryjHB7RVGs",
+    "approve": true,
+    "final_score": 63,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight técnico específico sobre como containers e Kubernetes evitam lock-in de cloud provider, com fechamento claro."
+  },
+  {
+    "id": "P3090319KC5s.tuXtKcpQcb",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["critica_concorrente_nomeado"],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "Crítica negativa nomeada à ferramenta Lovable (comparação com Black Mirror sobre custos escalando fora de controle) — reprova sempre pela rubrica, independente do resto do conteúdo."
+  },
+  {
+    "id": "P3090319KC5s.2c9eGHSz87",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Técnica prática e replicável entregue de forma concisa e completa: pedir para a IA gerar o prompt em vez de estudar prompt engineering."
+  },
+  {
+    "id": "P3090319KC5s.UllbpDgpAB",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Técnica prática replicável: usar IA (Copilot/Claude) para ler o README e gerar diagramas Mermaid do projeto automaticamente."
+  },
+  {
+    "id": "P3090319KC5s.CHioteEWV6",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["sem_insight", "generico"],
+    "speech_flags": [],
+    "reason": "Reitera de forma vaga a ideia de pedir prompt para a IA, sem detalhar a técnica o suficiente para ensinar algo novo a um estranho."
+  },
+  {
+    "id": "P3090319KC5s.G0j5c5ao6q",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Levanta as perguntas de arquitetura (qual ferramenta, como salvar o state, como guardar segredos) mas corta antes de responder qualquer uma delas."
+  },
+  {
+    "id": "P3090319KC5s.LzRz5nEbsr",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "A ideia de time de especialistas ('Avengers') fica genérica, sem detalhar nenhuma prática concreta de liderança ou segurança."
+  },
+  {
+    "id": "P3090319KC5s.xnvcU5ANak",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": [],
+    "reason": "Técnica concreta de dividir o CI/CD em 3 pipelines (deploy/plan/build) aplicando pirâmide de testes, com autocrítica honesta sobre over-engineering."
+  }
+]

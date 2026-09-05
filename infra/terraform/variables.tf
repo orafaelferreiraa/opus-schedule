@@ -66,38 +66,6 @@ variable "shared_acs_name" {
   default     = "acs-jobfinder-prod"
 }
 
-variable "shared_foundry_name" {
-  description = "Conta Azure OpenAI/Foundry compartilhada usada pelo Judge (modo hybrid)."
-  type        = string
-  default     = "aif-jobfinder-prod-randonix"
-}
-
-# ---------------------------------------------------------------------------
-# Judge (dormente por padrão: JUDGE_MODE=rules_only)
-# ---------------------------------------------------------------------------
-variable "judge_auth_mode" {
-  description = "Modo de auth do Judge no modo hybrid: managed_identity ou api_key."
-  type        = string
-  default     = "managed_identity"
-
-  validation {
-    condition     = contains(["managed_identity", "api_key"], var.judge_auth_mode)
-    error_message = "judge_auth_mode deve ser: managed_identity ou api_key."
-  }
-}
-
-variable "judge_primary_model" {
-  description = "Deployment primário no Foundry compartilhado (reutiliza o existente)."
-  type        = string
-  default     = "gpt-5-mini"
-}
-
-variable "judge_fallback_model" {
-  description = "Deployment de fallback no Foundry compartilhado."
-  type        = string
-  default     = "gpt-5-mini"
-}
-
 # ---------------------------------------------------------------------------
 # Segredos / configuração de runtime
 # ---------------------------------------------------------------------------

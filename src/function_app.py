@@ -57,8 +57,7 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
         "max_per_network": 1,
         "split_layout_only": true,             # opcional: agenda só clips já salvos com layout dividido
         "auto_prepare_split_layout": false,     # opcional: true força PUT em renderPref antes de agendar
-        "judge_mode": "off",                  # off | rules_only | hybrid
-        "judge_threshold": 70,
+        "judge_mode": "off",                  # off | rules_only (gate mecânico)
         "judge_include_review_in_dry_run": true
     }
     """
@@ -111,7 +110,6 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                 lowopscast_split_layout_only=split_layout_only,
                 lowopscast_auto_prepare_split_layout=auto_prepare_split_layout,
                 lowopscast_judge_mode=judge_settings.mode,
-                lowopscast_judge_threshold=judge_settings.threshold,
             )
             for key, value in request_attrs.items():
                 span.set_attribute(key, value)
@@ -251,7 +249,7 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
 
             judge_results: list[dict] = []
             judge_summary: dict = {}
-            if judge_settings.mode in {"rules_only", "hybrid"}:
+            if judge_settings.mode == "rules_only":
                 judge_started = time.perf_counter()
                 with tracer.start_as_current_span("lowopscast.judge_clips") as child_span:
                     judge_results = judge_clips(clips, judge_settings)
@@ -284,20 +282,6 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                     allowed = {"APPROVE"}
                 clips = [clip for clip in clips if decision_by_id.get(str(clip.get("id", ""))) in allowed]
 
-                # Ponte relatório→agendamento: anexa o score de CONTEÚDO da Judge LLM
-                # aos clips para o build_schedule_plan ranquear por substância real
-                # (payoff/insight) em vez de duração. Só o modo hybrid (source=="llm")
-                # gera scores diferenciados; rules_only dá 100 uniforme e é ignorado.
-                content_score_by_id = {
-                    str(result.get("id", "")): int(result.get("final_score", 0))
-                    for result in judge_results
-                    if str(result.get("source", "")) == "llm"
-                }
-                for clip in clips:
-                    score = content_score_by_id.get(str(clip.get("id", "")))
-                    if score is not None:
-                        clip["_content_score"] = score
-
                 logger.info(
                     "Judge aplicada aos clips",
                     extra={
@@ -320,7 +304,6 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                                 "message": "Nenhum clip aprovado pela Judge para agendamento",
                                 "judge": {
                                     "mode": judge_settings.mode,
-                                    "threshold": judge_settings.threshold,
                                     "summary": judge_summary,
                                     "results": judge_results,
                                 },
@@ -405,7 +388,6 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                             "schedule_plan": plan,
                             "judge": {
                                 "mode": judge_settings.mode,
-                                "threshold": judge_settings.threshold,
                                 "summary": judge_summary,
                                 "results": judge_results,
                             },
@@ -528,7 +510,6 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
                         "failures": failed,
                         "judge": {
                             "mode": judge_settings.mode,
-                            "threshold": judge_settings.threshold,
                             "summary": judge_summary,
                         },
                     },
@@ -553,17 +534,15 @@ def schedule_existing_clips(req: func.HttpRequest) -> func.HttpResponse:
 
 @app.route(route="analyze-library", methods=["POST"])
 def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
-    """Relatório de qualidade dos cortes da biblioteca (quais valem postar).
+    """Relatório de qualidade dos cortes da biblioteca (gate mecânico).
 
-    Gate mecânico (limpeza de fala via transcrição + duração) + veredito de CONTEÚDO
-    do LLM gpt-5-mini (payoff/insight/humor real para o público do LowOpsCast, não
-    apenas fala limpa). `recommended` = passou no gate E (se use_llm) o LLM aprovou o
-    conteúdo. Independente de layout. Body JSON (tudo opcional):
+    Gate mecânico (limpeza de fala via transcrição + duração). `recommended` = passou no
+    gate. A curadoria de CONTEÚDO (payoff/insight) é feita localmente pelo Claude Code via
+    o harness em `tools/curate/` (rubrica em `src/shared/curation_rubric.md`), não por este
+    endpoint. Independente de layout. Body JSON (tudo opcional):
     {
         "project_ids": ["P..."],          # default: todos (menos os vídeos pessoais)
         "exclude_project_ids": ["P..."],
-        "use_llm": true,                  # roda o gpt-5-mini nos que passam o gate mecânico
-        "llm_scope": "candidates",        # ou "all" para rodar em todos os cortes
         "rules": { "max_pauses_per_min": 6, "max_reps": 2, "max_filler_pct": 13, ... },
         "top_n_per_project": 5            # limita cortes retornados por projeto
     }
@@ -587,8 +566,6 @@ def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
                 project_ids=body.get("project_ids") or None,
                 exclude_project_ids=body.get("exclude_project_ids"),
                 rules=body.get("rules") or None,
-                use_llm=bool(body.get("use_llm", False)),
-                llm_scope=str(body.get("llm_scope", "candidates")),
                 top_n_per_project=body.get("top_n_per_project"),
             )
             mark_ok(
@@ -597,7 +574,6 @@ def analyze_library(req: func.HttpRequest) -> func.HttpResponse:
                 lowopscast_projects_analyzed=report["projects_analyzed"],
                 lowopscast_total_clips=report["total_clips"],
                 lowopscast_recommended_total=report["recommended_total"],
-                lowopscast_llm_used=report["llm_used"],
             )
             return func.HttpResponse(json.dumps(report, default=str), status_code=200, mimetype="application/json")
         except Exception as exc:

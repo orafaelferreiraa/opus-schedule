@@ -1,152 +1,128 @@
 ---
 name: clip-curation-internals
-description: Mecânica interna da curadoria de cortes — as DUAS implementações de LLM (shared/judge.py no caminho de agendamento e shared/clip_quality.py no caminho de relatório) que leem os mesmos env vars JUDGE_* com defaults, contratos JSON e concorrência diferentes, além dos gates mecânicos e das faixas de decisão. Use ao mexer em judge.py, clip_quality.py, library_report.py, no prompt/rubrica de curadoria, em qualquer env var JUDGE_*, ao ligar ou depurar o modo hybrid, e quando o usuário falar de judge, curadoria, aprovar/reprovar corte, threshold, score de conteúdo ou gpt-5-mini.
+description: Mecânica interna da curadoria de cortes — os gates mecânicos determinísticos (shared/judge.py no agendamento e shared/clip_quality.py no relatório) e o harness local de curadoria de CONTEÚDO dirigido pelo Claude Code (tools/curate/, rubrica em src/shared/curation_rubric.md). Use ao mexer em judge.py, clip_quality.py, library_report.py, na rubrica de curadoria, nos gates mecânicos, nas env vars JUDGE_*, ou quando o usuário falar de judge, curadoria, aprovar/reprovar corte, score de conteúdo, verdicts.json ou o projeto do Paulo.
 ---
 
 # Mecânica da curadoria
 
 `distribution-strategy` cobre a política editorial (o que viraliza, cadência, ordem dos tiers, CTA).
-Esta skill cobre a **mecânica**: quem chama o LLM, com que parâmetros e o que quebra em silêncio.
+Esta skill cobre a **mecânica**: quem filtra o quê, e onde a substância de conteúdo é julgada.
 
-## O fato central: existem DUAS implementações de LLM, não uma
+## O modelo atual: gate mecânico no código + curadoria de conteúdo local com o Claude
 
-Elas leem os **mesmos** env vars `JUDGE_*` mas são código independente, com defaults e contratos
-diferentes. Nunca foram reconciliadas.
+Desde 2026-09-02 o **Azure AI Foundry (`gpt-5-mini`) foi arrancado** de `judge.py`,
+`clip_quality.py` e do Terraform. Não há mais chamada de LLM remoto em lugar nenhum do código.
+A verificação agora tem **duas camadas separadas**:
 
-| | `shared/judge.py` | `shared/clip_quality.py` |
-|---|---|---|
-| Caminho | `POST /schedule-existing-clips` | `POST /analyze-library` |
-| Param de token | **`max_tokens: 300`** hardcoded (`judge.py:248`) | **`max_completion_tokens`**, default 1500 (`:134`) |
-| Contrato JSON | `final_score` · `soft_signals` · `audit_reason` | `final_score` · `approve` · `content_flags` · `speech_flags` · `reason` |
-| Duração aceita | 10 s – 180 s | 20 s – 90 s (`DEFAULT_RULES`) |
-| Concorrência | **loop serial** (`judge.py:73-77`) | `ThreadPoolExecutor(max_workers=10)` (`library_report.py:100`) |
-| Falha do LLM | → `REVIEW`, `source="fallback"` | → `ok=False` → não recomendado |
+1. **Gate mecânico determinístico** (no código, roda no cloud e localmente) — limpeza de fala e
+   duração. Só isso corre dentro do Function App.
+2. **Curadoria de CONTEÚDO** (payoff/insight) — feita **localmente pelo Claude Code** via o harness
+   em `tools/curate/`. Eu leio as transcrições e aplico a rubrica única em
+   `src/shared/curation_rubric.md`, produzindo `verdicts.json`. Não é autônoma no cloud.
 
-**A armadilha nº 1 deste subsistema:** os dois arquivos carregam a **mesma rubrica editorial**
-("só vale postar se tiver payoff concreto; fala limpa NÃO basta") escrita com palavras e chaves JSON
-diferentes — `judge.py:252-263` e `clip_quality.py:100-124`. Pedido de "deixar o judge mais
-rigoroso" ou "ajustar a rubrica" **precisa tocar os dois**. Editar um só faz a política divergir
-entre os dois endpoints sem nenhum sinal de erro.
+**Consequência de design:** o modo `hybrid` não existe mais; `JUDGE_MODE` só assume `off` ou
+`rules_only`, e `rules_only` significa **apenas gate mecânico**. Quem pedir "ligar o judge LLM" ou
+"deixar o judge mais rigoroso" está falando da **rubrica** (`curation_rubric.md`) e do harness, não
+de env var nem de deployment.
 
-Matriz completa de env var × default de cada arquivo × valor do Terraform × sobrescrevível no body:
-[reference/judge-config.md](reference/judge-config.md).
+## O harness local (`tools/curate/`)
 
-## Modos e o gate que desliga tudo em silêncio
+Fluxo em três passos — os passos 1 e 3 são scripts; o passo 2 sou eu:
 
-`function_app.py:254` liga a curadoria com `if judge_settings.mode in {"rules_only", "hybrid"}`.
+1. **`prep.py`** — acha o projeto (`--title` casa no `sourceInfo.title`, ou `--project-id`), puxa os
+   clips via `OpusClient.get_clips_by_project`, usa a transcrição nativa `clip["text"]` (todos os
+   clips já trazem; **não precisa de whisper**), roda o gate mecânico (reaproveita
+   `extract_speech_signals` + `rule_verdict` de `clip_quality.py`) e escreve
+   `review/<projectId>/clips.json` + `transcripts.md`.
+2. **Eu (Claude) julgo** cada corte pela rubrica e escrevo `review/<projectId>/verdicts.json`:
+   `[{id, approve, final_score, content_flags, speech_flags, reason}]`.
+3. **`plan.py`** — funde os veredictos, marca `recommended = gate_passed AND approve`, anexa
+   `_content_score = final_score` aos aprovados, roda `build_schedule_plan` e imprime o **plano em
+   dry-run** (não chama `create_schedules`) + renderiza `report.md` no estilo de
+   `cortes-recomendados.md`.
 
-Qualquer outro valor — `"on"`, `"llm"`, `"hibrido"`, `"Hybrid"` com maiúscula já é tratado por
-`.lower()`, mas um typo não — **pula o bloco inteiro e agenda todos os clips**. Não há log, não há
-erro, não há métrica. O branch `source="disabled"` em `judge.py:141-152` é inalcançável via HTTP.
-Se a curadoria "não está filtrando nada", conferir o valor exato de `JUDGE_MODE` é o primeiro passo.
+`review/**/clips.json` e `transcripts.md` são gitignored (volumosos, regeneráveis); `verdicts.json`
+e `report.md` podem ser versionados como entregável.
 
-- `off` — não usado pelo HTTP (o gate acima já exclui).
-- `rules_only` — **é o modo de produção hoje** (`main.tf:109`). Só regras mecânicas; devolve
-  `final_score` uniforme **100**, que é deliberadamente ignorado pelo ranking.
-- `hybrid` — chama o LLM. Ver a seção de risco abaixo antes de ligar.
-
-## Três faixas de decisão, não um corte
-
-`judge.py:184-190`, com `threshold` default 70:
-
-| Faixa | Decisão |
-|---|---|
-| `score >= threshold` | `APPROVE` |
-| `threshold-10 < score < threshold` | `REVIEW` (faixa de 9 pontos) |
-| `score <= threshold-10` | `REJECT` |
-
-Subir o threshold para 80 **também** move o piso de rejeição para 70. Não existe knob separado para
-a largura da faixa.
-
-E o que é feito com `REVIEW` depende do dry-run (`function_app.py:281-284`):
-
-```
-dry_run E include_review_in_dry_run  → aceita {APPROVE, REVIEW}
-qualquer outro caso                  → aceita só {APPROVE}
+```bash
+python3 tools/curate/prep.py --title Paulo     # projeto piloto: P3083113Va84 (#55, Paulo Alves)
+# … eu escrevo verdicts.json …
+python3 tools/curate/plan.py --project-id P3083113Va84
 ```
 
-Em produção `JUDGE_INCLUDE_REVIEW_IN_DRY_RUN="true"` (`main.tf:117`).
+## A rubrica é fonte ÚNICA agora
 
-## Risco ao ligar o modo hybrid — verificar antes de acreditar
+Antes a mesma rubrica editorial vivia duplicada em dois prompts de LLM. Agora ela vive **só** em
+`src/shared/curation_rubric.md` (9 payoffs, incl. gestão de pessoas/liderança; "fala limpa NÃO
+basta"; **reprovar SEMPRE crítica
+negativa a concorrente/fornecedor nomeado** → flag `critica_concorrente_nomeado`; na dúvida,
+reprova). Ajuste de critério = editar **esse arquivo**, e eu o sigo no passo 2.
 
-Três fatos verificados que se combinam mal:
+## Modos do judge mecânico (`shared/judge.py`)
 
-1. `judge.py:248` manda `"max_tokens": 300`. Deployments de raciocínio da família GPT-5 tipicamente
-   **rejeitam** `max_tokens` (400 `unsupported_parameter`) e exigem `max_completion_tokens` — que é
-   exatamente o que o `clip_quality.py` usa. Existe até um env var `JUDGE_MAX_COMPLETION_TOKENS`,
-   **não ligado** a esta chamada.
-2. `judge_primary_model` **e** `judge_fallback_model` são ambos `gpt-5-mini`
-   (`variables.tf:88-99`). A escada primário → fallback (`judge.py:154-182`) não resgata um erro de
-   parâmetro: o fallback falha igual.
-3. Toda falha do LLM cai em `REVIEW`/`source="fallback"`. Com `include_review_in_dry_run=true`, um
-   `dry_run` **parece perfeito** (aceita REVIEW) e a execução real agenda **zero clips** (só APROVE).
+`function_app.py` liga o gate com `if judge_settings.mode == "rules_only"`.
 
-Nenhum teste cobre o corpo HTTP do hybrid — `test_judge.py` só exercita `_safe_json`,
-`_run_hard_rules` e `_build_auth_headers`.
+- `rules_only` — **modo de produção** (`main.tf`). Só as hard rules; devolve `final_score` uniforme
+  **100** (não ordena nada — o ranking real usa `_content_score` do harness).
+- qualquer outro valor (`off`, typo, etc.) — cai no ramo `source="disabled"`: **aprova todos os
+  clips sem filtrar**. Não há log nem erro. Se a curadoria "não está filtrando", conferir
+  `JUDGE_MODE` é o primeiro passo.
 
-**Portanto:** antes de declarar que hybrid funciona, fazer **uma** chamada real (curl ou um clip só)
-e conferir que voltou `source="llm"`, não `source="fallback"`. Não confiar em dry-run verde.
+Decisão do judge mecânico é binária: **APPROVE** (passou nas hard rules) ou **REJECT** (falhou).
+Não há mais faixa de `REVIEW` (isso vinha do score do LLM, que não existe). `include_review_in_dry_run`
+segue sendo lido mas é inócuo, já que REVIEW nunca é produzido.
 
-## Retry: mais amplo do que o rótulo sugere
+## Os dois gates mecânicos medem coisas diferentes — armadilha que permanece
 
-`judge.py:284` classifica 408/429/5xx como transiente, mas o `except Exception` de `judge.py:292`
-faz retry de **tudo** — 401, erro de parse de JSON, endpoint errado. Com `max_retries=2` (3
-tentativas) × 2 deployments × até 12 s, **em série**, uma coleção grande em hybrid estoura o timeout
-da Function. O caminho de relatório é paralelo; o de agendamento **não é**.
+**`judge.py:_run_hard_rules`** — o texto que ele mede é `title + description`, **não a
+transcrição**. Um corte com transcrição rica e metadados vazios é **hard-rejected por
+`text_too_short`**. Duração aceita: `JUDGE_MIN_DURATION_MS`..`JUDGE_MAX_DURATION_MS` (10 s–180 s por
+default). São os únicos gates no caminho de agendamento.
 
-## Gates mecânicos: os dois medem coisas diferentes
+**`clip_quality.extract_speech_signals` + `rule_verdict`** — medem a transcrição de verdade:
+`__silence` = pausas, sufixo `--` = cortes de palavra, repetição imediata, densidade de filler, e
+duração 20 s–90 s (`DEFAULT_RULES`). É o gate usado pelo relatório **e** pelo harness (`prep.py`).
 
-**`judge.py:_run_hard_rules`** (`:205-219`) — o texto que ele mede é `title + description`,
-**não a transcrição**. Mas o prompt enviado ao LLM usa `clip["text"]` (a transcrição, `:236`).
-Consequência: um corte com transcrição rica e metadados vazios é **hard-rejected por
-`text_too_short` antes do LLM ver qualquer coisa**.
-
-**`clip_quality.extract_speech_signals`** (`:52-70`) — mede a transcrição de verdade:
-`__silence` conta pausas, sufixo `--` conta cortes de palavra, repetição imediata, densidade de
-filler. `DEFAULT_RULES` foi **calibrado na distribuição real de 344 cortes** (`:36-45`); não mexer
-nos números sem redistribuir.
-
-A lista `_FILLERS` é **PT-BR e específica do apresentador** — `"cara"` está lá porque é tique dele
-(`:29-32`). Adicionar filler em inglês ou trocar por tokenizer genérico produz sinais todos zerados,
-que passam por qualquer gate.
+`DEFAULT_RULES` foi **calibrado na distribuição real de 344 cortes** — não mexer nos números sem
+redistribuir. A lista `_FILLERS` é **PT-BR e específica do apresentador** (`"cara"` está lá porque é
+tique dele). Trocar por tokenizer genérico ou filler em inglês zera os sinais e tudo passa.
 
 ## Anti-padrão documentado: os scores nativos da OpusClip
 
 `raw` / `hook` / `coherence` / `connection` são reportados mas **excluídos de propósito de todo
-gate** (`clip_quality.py:1-16` e `:36-37`). Motivo verificado empiricamente: a própria OpusClip é
-"torcedora" — dá nota alta para qualquer anedota bem contada, mesmo sem substância.
+gate**. Motivo verificado: a OpusClip é "torcedora" — dá nota alta a qualquer anedota bem contada,
+mesmo sem substância. Quem for "melhorar o gate" vai querer usá-los primeiro; é justamente o que não
+se faz. `test_library_report.py` (`test_mechanical_gate_ignores_opus_native_scores`) trava isso.
 
-Quem for "melhorar o gate" vai querer usar esses campos primeiro. É justamente o que não se faz.
-`test_library_report.py:73-82` trava esse comportamento.
+## A ponte para o ranking: `_content_score`
 
-## A ponte para o ranking só existe em hybrid
-
-`function_app.py:291-299` anexa `_content_score` ao dict do clip **apenas** para
-`source == "llm"` — ou seja, só em hybrid. É mutação de dict em chave privada, consumida por
-`_CONTENT_FIELDS` em `schedule_matrix._clip_score` (tier 2).
-
-`rules_only` devolve 100 uniforme e é **deliberadamente excluído** da ponte: um score constante não
-ordena nada. Então em produção hoje o ranking opera em tier 1/tier 0, nunca em tier 2.
-
-## Knob morto: `JUDGE_PROVIDER`
-
-Definido em `main.tf:110` como `"foundry"`, lido para `settings.provider` em `judge.py:48`, e
-**nunca usado em lugar algum**. `_call_foundry_judge` é chamado incondicionalmente. Não é um ponto de
-extensão funcional — mudar seu valor não faz nada.
+`_content_score` (tier 2 de `schedule_matrix._clip_score`) é a melhor sinalização de viralidade.
+Hoje ela é anexada **pelo harness local** (`plan.py`, a partir do meu `final_score`), **não** pelo
+endpoint HTTP — a ponte antiga em `function_app.py` (que só existia no modo hybrid) foi removida.
+Portanto o endpoint `/schedule-existing-clips` sozinho ranqueia por tier 1/tier 0 (virality nativo /
+duração); tier 2 só aparece quando os clips chegam com `_content_score` do harness.
 
 ## Relatório (`/analyze-library`)
 
-`recommended = passou_no_gate_mecânico AND llm.approve`. `llm_scope` aceita `candidates` (só quem
-passou no gate) ou `all`. `DEFAULT_EXCLUDE_PROJECT_IDS` (`library_report.py:29`) fixa três projetos
-de vídeo pessoal que devem ficar fora da automação — não remover.
+`recommended = passou_no_gate_mecânico`. Sem `use_llm`/`llm_scope` (removidos).
+`DEFAULT_EXCLUDE_PROJECT_IDS` (`library_report.py`) fixa os projetos de vídeo pessoal que ficam fora
+da automação — não remover.
 
-`LLMSettings.enabled` exige `JUDGE_AZURE_OPENAI_ENDPOINT` presente (`clip_quality.py:138-139`);
-sem ele, `use_llm=true` **silenciosamente não faz nada**.
+## Env vars JUDGE_* que sobraram
+
+Só quatro ainda têm efeito (as de Foundry/threshold/model/auth foram removidas do código e do
+Terraform):
+
+| Env var | Efeito | Default |
+|---|---|---|
+| `JUDGE_MODE` | `rules_only` (gate) ou `off` (aprova tudo) | `off` (código) / `rules_only` (prod) |
+| `JUDGE_INCLUDE_REVIEW_IN_DRY_RUN` | inócuo hoje (não há REVIEW) | `true` |
+| `JUDGE_MIN_DURATION_MS` / `JUDGE_MAX_DURATION_MS` | hard rule de duração | 10000 / 180000 |
+| `JUDGE_MIN_TEXT_CHARS` | hard rule de tamanho de `title+description` | 10 |
 
 ## Validação
 
 ```bash
 pytest src/tests/test_judge.py src/tests/test_library_report.py -q
+python3 tools/curate/prep.py --project-id P3083113Va84   # smoke do harness
 ```
-
-Lembrar da cobertura real: nenhum teste toca o corpo HTTP do hybrid.

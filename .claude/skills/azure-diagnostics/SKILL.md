@@ -14,7 +14,6 @@ description: Diagnóstico do LowOpsCast em produção no Azure — consultas KQL
 | Storage (runtime + tabela) | `stjobfinderprodrandonix` | `rg-jsearch` |
 | Tabela de idempotência | `lowopscaststate` | idem |
 | State do Terraform | `stoopusstate` | `rg-state-opus` |
-| AI Foundry (Judge) | `aif-jobfinder-prod-randonix` (`gpt-5-mini`) | `rg-jsearch` |
 
 App Insights e Storage são **compartilhados** com o projeto jobfinder → **sempre filtrar** por
 `lowopscast` / `cloud_RoleName == "func-lowopscast-prod"`, senão o resultado mistura os dois
@@ -95,6 +94,7 @@ exceptions
 Counters: `lowopscast.function.invocations` · `lowopscast.clips.found` ·
 `lowopscast.schedules.planned` · `.created` · `.failed` · `.skipped` ·
 `lowopscast.judge.clips.total` · `.approved` · `.review` · `.rejected`
+(o judge agora é só gate mecânico; `.review` fica sempre 0, `.approved`/`.rejected` = passou/falhou nas hard rules)
 
 Histogramas (ms): `lowopscast.execution.duration` · `lowopscast.judge.latency` ·
 `lowopscast.opus.publish.latency`
@@ -136,12 +136,11 @@ Para conferir o que está aplicado de fato:
 az functionapp config appsettings list -n <func-lowopscast-*> -g rg-lowopscast-schedule -o table
 ```
 
-Variáveis que mudam comportamento: `JUDGE_MODE` (`off`/`rules_only`/`hybrid`), `JUDGE_THRESHOLD`,
-`JUDGE_INCLUDE_REVIEW_IN_DRY_RUN`, `JUDGE_AUTH_MODE`, `STATE_TABLE_NAME`, `NOTIFICATION_EMAIL_TO`,
-`OPUSCLIP_ORG_ID`. Mudança de valor vai pelo Terraform, não por `az` — `az` é para **ler**.
+Variáveis que mudam comportamento: `JUDGE_MODE` (`off`/`rules_only` — o modo `hybrid` e o Azure AI
+Foundry foram removidos em 2026-09-02), `JUDGE_INCLUDE_REVIEW_IN_DRY_RUN`, `STATE_TABLE_NAME`,
+`NOTIFICATION_EMAIL_TO`, `OPUSCLIP_ORG_ID`. Mudança de valor vai pelo Terraform, não por `az` — `az`
+é para **ler**. As env vars de Foundry (`JUDGE_AZURE_OPENAI_*`, `JUDGE_MODEL_*`, `JUDGE_THRESHOLD`,
+`JUDGE_AUTH_MODE`, `JUDGE_PROVIDER`) não existem mais no app.
 
-`JUDGE_PROVIDER` **não** muda nada: é lido para `settings.provider` (`judge.py:48`) e nunca usado —
-`_call_foundry_judge` é incondicional. Não usar como alavanca de diagnóstico.
-
-A semântica completa das `JUDGE_*` (e as duas implementações de LLM que as compartilham) está na
-skill `clip-curation-internals`.
+A curadoria de CONTEÚDO agora é um harness local com o Claude Code (`tools/curate/`), não roda no
+cloud. Semântica completa na skill `clip-curation-internals`.

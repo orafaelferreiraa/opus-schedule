@@ -1,0 +1,314 @@
+[
+  {
+    "id": "P3090402YL1N.jRHKXYa9OI",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Explica com clareza o conceito de 'engenheiro de plataforma' e por que ele reduz fricção para devs — insight técnico completo e autocontido."
+  },
+  {
+    "id": "P3090402YL1N.rzfe1MRlYs",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": ["gaguejo", "filler"],
+    "reason": "Notícia de bastidores sobre troca de liderança em comunidade local (Amanda/Léo) sem insight, lição ou payoff que interesse um estranho."
+  },
+  {
+    "id": "P3090402YL1N.nq8Ppcs7kL",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["sem_payoff"],
+    "speech_flags": ["repeticao", "filler"],
+    "reason": "É a pergunta do host pedindo os diferenciais da Azure — não traz a resposta/conteúdo, é só o gancho da pergunta."
+  },
+  {
+    "id": "P3090402YL1N.PybTGPrVLp",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Conselho de carreira acionável: usar projetos paralelos como portfólio/sandbox quando o trabalho é fechado por NDA."
+  },
+  {
+    "id": "P3090402YL1N.LaiYHczscZ",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Conselho de carreira direto e acionável: comece a buscar estágio desde o primeiro semestre da faculdade."
+  },
+  {
+    "id": "P3090402YL1N.LbGBYBSTNm",
+    "approve": false,
+    "final_score": 35,
+    "content_flags": ["anedota_fraca", "sem_payoff"],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Anedota sobre cronograma de convite pra palestra e criação de um site com a Jé; menção vaga a usar IA, sem técnica nem lição clara."
+  },
+  {
+    "id": "P3090402YL1N.bPQIAMytni",
+    "approve": true,
+    "final_score": 80,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Virada de carreira com lição clara: parar de se dispersar entre AWS/GCP e focar 100% em Azure foi o que o diferenciou no mercado."
+  },
+  {
+    "id": "P3090402YL1N.IzfSm7Lmb9",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Fala genérica sobre gostar de trabalhar com Azure/Cloud/DevOps, sem insight ou lição; o raciocínio nem fecha no final."
+  },
+  {
+    "id": "P3090402YL1N.sBZcWsZ5PF",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": ["repeticao"],
+    "reason": "Relato de trajetória de carreira sem lição explícita; conclui só com observação genérica de que 'estourou tecnologia na pandemia'."
+  },
+  {
+    "id": "P3090402YL1N.T6hAWrP7Xr",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["incompleto"],
+    "speech_flags": [],
+    "reason": "Fragmento confuso que depende de um comentário externo não mostrado sobre NDA; a ideia não fecha de forma clara e autocontida."
+  },
+  {
+    "id": "P3090402YL1N.PlfEDjEigv",
+    "approve": true,
+    "final_score": 75,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Trilha de carreira completa e concreta: seguir os níveis de certificação Microsoft (fundamentals→associate→expert) e alternativa via portfólio documentado."
+  },
+  {
+    "id": "P3090402YL1N.wbHo174rlz",
+    "approve": true,
+    "final_score": 65,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight técnico sobre o papel de arquiteto: não precisa saber todo detalhe, mas entender o suficiente para saber qual serviço resolve o problema."
+  },
+  {
+    "id": "P3090402YL1N.pJhBVTrJGp",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Insight técnico com analogia forte (aula de dança): fundamentos importam mais que a linguagem/ferramenta específica."
+  },
+  {
+    "id": "P3090402YL1N.oPiJNAYWbC",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": [],
+    "reason": "Mensagem inspiracional sobre aprendizado contínuo em arquitetura (ninguém sabe tudo, é processo); abre puxando 'a palavra que você usou' que não é revelada no corte."
+  },
+  {
+    "id": "P3090402YL1N.fsSmRFcw9v",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Conselho relacionável sobre networking: estar presente em comunidades diferentes da sua área principal para se conectar e transitar entre elas."
+  },
+  {
+    "id": "P3090402YL1N.aJzolJyln5",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Trilha de carreira concreta de migração on-premise para cloud, incluindo certificações específicas necessárias (Z-900, AZ-104) e expectativa vs. realidade."
+  },
+  {
+    "id": "P3090402YL1N.S9QD0kGKI3",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": [],
+    "reason": "Alerta técnico real sobre over-engineering (cache antecipado pra problema de daqui a 3 anos); o corte termina cortado antes de fechar a lista final de consequências."
+  },
+  {
+    "id": "P3090402YL1N.sHbP6mhm9F",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Humor genuíno e relacionável sobre a rotina de TI/DevOps: 'no nosso dia ou resolvendo problema ou criando problema' após empilhar Kubernetes/observabilidade/IA."
+  },
+  {
+    "id": "P3090402YL1N.raOMvYJGWs",
+    "approve": false,
+    "final_score": 8,
+    "content_flags": ["sem_payoff"],
+    "speech_flags": ["repeticao", "gaguejo", "filler"],
+    "reason": "É a auto-apresentação/pergunta de abertura do host perguntando quem é o Rafael fora da tecnologia — sem conteúdo de resposta."
+  },
+  {
+    "id": "P3090402YL1N.YkduWtVue9",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": ["filler"],
+    "reason": "Elogio genérico a um projeto de gestão de eventos sem detalhar insight técnico ou lição que sustente o corte sozinho."
+  },
+  {
+    "id": "P3090402YL1N.9Pid5ALqar",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["anedota_fraca", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Relato sobre sorte e vouchers de certificação sem lição acionável — é mais sorte/privilégio do que conselho replicável."
+  },
+  {
+    "id": "P3090402YL1N.JUacsFnynX",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["fora_do_tema", "sem_payoff"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Auto-promoção do próprio podcast pedindo pra ouvirem no Spotify — não é payoff de conteúdo."
+  },
+  {
+    "id": "P3090402YL1N.R5kfG4TrPr",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["incompleto"],
+    "speech_flags": ["filler"],
+    "reason": "Fragmento confuso que começa falando de sushi e emenda de forma vaga num projeto com IA; não fecha um raciocínio autocontido."
+  },
+  {
+    "id": "P3090402YL1N.t9uqD2rqUz",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "anedota_fraca"],
+    "speech_flags": [],
+    "reason": "Elogio raso à comunidade Python Floripa sem fato surpreendente ou insight."
+  },
+  {
+    "id": "P3090402YL1N.USRkD2sHzA",
+    "approve": true,
+    "final_score": 55,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Curiosidade/orgulho regional sobre Floripa como polo de startups e tecnologia ('Ilha do Silício'), atrativo pro público-alvo remoto."
+  },
+  {
+    "id": "P3090402YL1N.1Qj86L7XyD",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": ["filler"],
+    "reason": "Mesma notícia de bastidores da comunidade Floripa Gophers, sem payoff para quem não conhece as pessoas envolvidas."
+  },
+  {
+    "id": "P3090402YL1N.AGyhW5laDC",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["incompleto", "generico"],
+    "speech_flags": ["filler"],
+    "reason": "Fala vaga sobre flexibilidade de tema em comunidades, dependendo de contexto externo não dado no corte."
+  },
+  {
+    "id": "P3090402YL1N.Ua0LxEuNc3",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["anedota_fraca", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Relato pessoal de como encontrou a comunidade Azure Floripa, sem lição explícita generalizável."
+  },
+  {
+    "id": "P3090402YL1N.lcoK0AKrRK",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["generico", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Parabenização genérica ao Léo sem substância de conteúdo."
+  },
+  {
+    "id": "P3090402YL1N.2xbS5arCdn",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["fora_do_tema", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Bate-papo de logística entre host e convidado sobre agendar retorno ao podcast — sem conteúdo de payoff."
+  },
+  {
+    "id": "P3090402YL1N.kIxtHAV6dL",
+    "approve": false,
+    "final_score": 10,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": ["repeticao", "filler"],
+    "reason": "Fragmento de teaser ('breaking news') sem desenvolver o conteúdo, corte não fecha nenhum raciocínio."
+  },
+  {
+    "id": "P3090402YL1N.PS1jsAMweo",
+    "approve": true,
+    "final_score": 63,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "História genuína sobre o Léo ajudando bastidores sem ser pedido (buscar água pro palestrante) com lição implícita de reconhecer quem sustenta a comunidade."
+  },
+  {
+    "id": "P3090402YL1N.Za0bYo6yM7",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["fora_do_tema", "sem_payoff"],
+    "speech_flags": ["filler"],
+    "reason": "Bastidores/agradecimentos de produção do próprio podcast — não é conteúdo de interesse pro público externo."
+  },
+  {
+    "id": "P3090402YL1N.z8ex8mL3ja",
+    "approve": false,
+    "final_score": 30,
+    "content_flags": ["fora_do_tema", "generico"],
+    "speech_flags": [],
+    "reason": "Descrição logística de inscrição e datas do evento Global Azure, sem insight ou lição — é divulgação de evento."
+  },
+  {
+    "id": "P3090402YL1N.gecD3bMYR8",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Mensagem inspiracional entregue com convicção: 'se a maré sobe, todo barquinho sobe junto' sobre apoiar comunidades de tecnologia."
+  },
+  {
+    "id": "P3090402YL1N.y6J7JDBkJt",
+    "approve": false,
+    "final_score": 32,
+    "content_flags": ["anedota_fraca", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Relato de como começou a frequentar comunidades (TDC, Azure Floripa) sem lição explícita generalizável, similar ao corte 28."
+  },
+  {
+    "id": "P3090402YL1N.pkvb88Q0FG",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["fora_do_tema", "generico"],
+    "speech_flags": ["gaguejo"],
+    "reason": "Agradecimento pelo convite e menção a ter estudado para certificação — sem payoff de conteúdo."
+  },
+  {
+    "id": "P3090402YL1N.eqOAvNVvHf",
+    "approve": true,
+    "final_score": 67,
+    "content_flags": [],
+    "speech_flags": ["filler", "repeticao"],
+    "reason": "Insight técnico específico: aponta o Atlas como um dos poucos serviços genuinamente multicloud, conectando GCP/AWS/Azure."
+  },
+  {
+    "id": "P3090402YL1N.Bp8rEahOz5",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Insight profissional sobre consultoria minimalista: entregar soluções que funcionam com performance sem over-engineering."
+  }
+]

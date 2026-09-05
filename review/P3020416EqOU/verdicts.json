@@ -1,0 +1,282 @@
+[
+  {
+    "id": "P3020416EqOU.RwfW6KVLby",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["filler"],
+    "reason": "Lista genérica das fases planejamento/desenvolvimento/entrega/operação sem exemplo concreto ou técnica específica."
+  },
+  {
+    "id": "P3020416EqOU.feCWyJgp7t",
+    "approve": true,
+    "final_score": 70,
+    "content_flags": [],
+    "speech_flags": ["repeticao"],
+    "reason": "Insight concreto de cultura DevOps: cultura blameless, foco em evolução rápida em vez de apontar culpado, e post-mortem de causa raiz."
+  },
+  {
+    "id": "P3020416EqOU.D85RdjYnAr",
+    "approve": true,
+    "final_score": 68,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Ideia completa sobre autonomia de times: deploy independente sem janelas de mudança, sustentado por confiança compartilhada com a liderança."
+  },
+  {
+    "id": "P3020416EqOU.41Sez8N5JK",
+    "approve": true,
+    "final_score": 72,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Roteiro de carreira concreto: não depender só da empresa, dominar Git/CI-CD/containers e automatizar progressivamente (deploy, depois testes, depois infra). Termina emendando \"e o que você pode esperar numa área de DevOps mais madura\" sem desenvolver."
+  },
+  {
+    "id": "P3020416EqOU.K7zub6uCHZ",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Explicação definicional do framework Three Ways (fluxo/feedback/aprendizado) sem exemplo prático que aterrisse a ideia."
+  },
+  {
+    "id": "P3020416EqOU.0vIDLhLB1l",
+    "approve": false,
+    "final_score": 18,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["filler"],
+    "reason": "Glossário puro de Dev vs Ops e menção ao Three Ways, sem insight ou exemplo concreto."
+  },
+  {
+    "id": "P3020416EqOU.TiL5eCwAfN",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["generico", "incompleto"],
+    "speech_flags": [],
+    "reason": "Pergunta retórica genérica que emenda direto na definição repetida de Dev/Ops de outro corte, sem payoff próprio."
+  },
+  {
+    "id": "P3020416EqOU.jgLz6j2TNw",
+    "approve": true,
+    "final_score": 65,
+    "content_flags": [],
+    "speech_flags": [],
+    "reason": "Conselho de carreira acionável: investir em treinamentos por conta própria como caminho concreto pra subir de cargo e salário."
+  },
+  {
+    "id": "P3020416EqOU.qqXqb1iYxC",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": ["filler"],
+    "reason": "Dica de carreira pontual e acionável: reservar 30 minutos por dia pra ler artigos e participar de eventos de tecnologia."
+  },
+  {
+    "id": "P3020416EqOU.L7WdXia8NE",
+    "approve": true,
+    "final_score": 78,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Exemplo concreto de liderança: como conscientizar o time, convencer o gestor e implementar uma ferramenta nova (Terraform) que ninguém domina ainda."
+  },
+  {
+    "id": "P3020416EqOU.13sH929Lox",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Anuncia dado da Gartner e promete listar as 4 métricas DORA, mas corta antes de entregar qualquer uma delas."
+  },
+  {
+    "id": "P3020416EqOU.lAUr4YgCeW",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["incompleto", "generico"],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Sequência solta de menções a livros e métricas sem desenvolver nenhuma, encerra anunciando outro tópico sem fechar ideia."
+  },
+  {
+    "id": "P3020416EqOU.iQpHXUSseo",
+    "approve": true,
+    "final_score": 74,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao", "gaguejo", "filler"],
+    "reason": "Explica de ponta a ponta o funcionamento de uma pipeline de CI/CD: push, build automatizado, bateria de testes e deploy automático em produção."
+  },
+  {
+    "id": "P3020416EqOU.Prqq79ZVlX",
+    "approve": false,
+    "final_score": 24,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["pausas", "repeticao", "gaguejo"],
+    "reason": "Analogia genérica waterfall vs sprint (Lego) que fecha no mantra repetido de que DevOps é cultura e não ferramenta, sem técnica concreta."
+  },
+  {
+    "id": "P3020416EqOU.CHV5MzO1DO",
+    "approve": true,
+    "final_score": 66,
+    "content_flags": [],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Insight de carreira/cultura: documentar e compartilhar conhecimento evita virar ponto único de falha, libera férias e abre caminho pra promoção."
+  },
+  {
+    "id": "P3020416EqOU.KpnYkiP8ha",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": [],
+    "reason": "Só anuncia o nome do framework CALMIS como solução, sem explicar nenhum conteúdo dele."
+  },
+  {
+    "id": "P3020416EqOU.lJmDt2KKLO",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["pausas"],
+    "reason": "Explica de forma concreta as 4 métricas DORA (Lead Time, Deploy Frequency, MTTR, Change Failure Rate), mas termina com uma pergunta lançada sem resposta."
+  },
+  {
+    "id": "P3020416EqOU.wn4JJ8ynhl",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Monta uma provocação ('DevOps é coisa do passado? Você se engana') mas corta exatamente antes de justificar o porquê."
+  },
+  {
+    "id": "P3020416EqOU.twtigRequL",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["sem_payoff", "generico"],
+    "speech_flags": [],
+    "reason": "Fala genérica sobre segurança integrada ao pipeline, termina em frase confusa/cortada sem conclusão clara."
+  },
+  {
+    "id": "P3020416EqOU.LHZTOINIKE",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao", "gaguejo"],
+    "reason": "Checklist técnico específico das práticas e ferramentas centrais de DevOps (Git, CI/CD, Ansible/Terraform/K8s, Prometheus/Zabbix/Grafana, cloud, containers)."
+  },
+  {
+    "id": "P3020416EqOU.6rt0N330ug",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao", "gaguejo"],
+    "reason": "Traz técnica prática do dia a dia (pesquisar com Stack Overflow/ChatGPT, gerar código com Copilot) pra ilustrar o que DevOps realmente significa na prática."
+  },
+  {
+    "id": "P3020416EqOU.l1GZc9GdDR",
+    "approve": false,
+    "final_score": 25,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": [],
+    "reason": "Analogia da fundação do prédio é só metáfora motivacional, sem técnica concreta de arquitetura cloud."
+  },
+  {
+    "id": "P3020416EqOU.hPlHquJny5",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Insight técnico específico sobre containers: portabilidade entre ambientes/clouds e boa prática concreta de não rodar como root nem hardcodear senha."
+  },
+  {
+    "id": "P3020416EqOU.J08KaxnMgC",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": ["gaguejo"],
+    "reason": "Explica de forma completa o ciclo CI/CD e amarra com gancho de carreira ao dizer que já caiu em entrevista de emprego."
+  },
+  {
+    "id": "P3020416EqOU.nXsN36jB0m",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["incompleto", "gancho_fraco"],
+    "speech_flags": ["pausas", "repeticao", "gaguejo"],
+    "reason": "É só a introdução de uma demo (menciona artigo e prompt colorido do terminal) sem entregar conteúdo substancial."
+  },
+  {
+    "id": "P3020416EqOU.OXmkqixm7j",
+    "approve": true,
+    "final_score": 55,
+    "content_flags": [],
+    "speech_flags": ["repeticao", "gaguejo"],
+    "reason": "Mesma virada de cultura blameless/post-mortem de causa raiz de outro corte aprovado, aqui encadeada com definições de Dev/Ops antes de fechar."
+  },
+  {
+    "id": "P3020416EqOU.gfZxNo44R0",
+    "approve": true,
+    "final_score": 58,
+    "content_flags": ["corte_no_meio"],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Curiosidade histórica concreta e datada sobre a origem do DevOps/SRE, com nomes, anos e o surgimento do DevOpsDays na Bélgica. Termina anunciando \"um desafio atual: a urgência de velocidade\" sem desenvolver."
+  },
+  {
+    "id": "P3020416EqOU.eKzXeoHOIm",
+    "approve": true,
+    "final_score": 60,
+    "content_flags": [],
+    "speech_flags": ["pausas", "gaguejo"],
+    "reason": "Mini case de transformação DevOps com resultado concreto: deploy semestral virando diário, menos bugs, feedback mais rápido."
+  },
+  {
+    "id": "P3020416EqOU.62723OjX6l",
+    "approve": true,
+    "final_score": 62,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Define de forma clara e específica os 4 C's, incluindo a diferença entre Continuous Deployment e Continuous Delivery que costuma confundir."
+  },
+  {
+    "id": "P3020416EqOU.ZgtNOEDSuh",
+    "approve": false,
+    "final_score": 22,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["pausas"],
+    "reason": "Fala de encerramento com jargão genérico de confiabilidade/SLA sem exemplo ou técnica concreta."
+  },
+  {
+    "id": "P3020416EqOU.AKUBArpQx2",
+    "approve": false,
+    "final_score": 18,
+    "content_flags": ["generico", "sem_insight"],
+    "speech_flags": ["pausas", "gaguejo", "filler"],
+    "reason": "Hype genérico sobre Kubernetes sem explicar nada de específico ou replicável."
+  },
+  {
+    "id": "P3020416EqOU.CoU6ved0Ga",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["critica_concorrente_nomeado"],
+    "speech_flags": ["pausas", "repeticao", "filler"],
+    "reason": "Comentário depreciativo nomeando o Jenkins como desatualizado frente às ferramentas atuais, reprova sempre por risco de imagem."
+  },
+  {
+    "id": "P3020416EqOU.SJbp4K58nT",
+    "approve": true,
+    "final_score": 64,
+    "content_flags": [],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Insight concreto de cultura FinOps: custo é do time e não só do chefe, ligado ao PLR, com foco em rightsizing em vez de simplesmente cortar recursos."
+  },
+  {
+    "id": "P3020416EqOU.GygWyGdNO0",
+    "approve": false,
+    "final_score": 15,
+    "content_flags": ["incompleto", "sem_payoff"],
+    "speech_flags": ["pausas", "filler"],
+    "reason": "Narração de demo apontando pra tela (Static Web App, código Terraform) sem conteúdo substantivo em palavras."
+  },
+  {
+    "id": "P3020416EqOU.1quZIFYjre",
+    "approve": false,
+    "final_score": 20,
+    "content_flags": ["generico", "incompleto"],
+    "speech_flags": ["pausas", "repeticao"],
+    "reason": "Repete o mantra de resultados do DevOps e corta bem no início de uma nova analogia (Star Wars) sem desenvolver."
+  }
+]
