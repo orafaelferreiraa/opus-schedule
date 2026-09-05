@@ -1,10 +1,5 @@
 """Testes do relatório de qualidade da biblioteca."""
 
-import json
-
-import azure.functions as func
-
-import function_app
 from shared.library_report import build_library_report
 
 CLEAN_TEXT = (
@@ -94,21 +89,3 @@ def test_excludes_personal_by_default():
     rep = build_library_report(FakeClient(projects, clips))
     assert "P30318211wd3" in rep["excluded_projects"]
     assert rep["projects_analyzed"] == 1
-
-
-def test_analyze_library_endpoint(patch_telemetry):
-    projects = [{"projectId": "P1", "sourceInfo": {"title": "Ep1"}}]
-    clips = {"P1": [_clip("P1.ok"), _clip("P1.longo", dur_ms=200000)]}
-    patch_telemetry.setattr(function_app, "OpusClient", lambda: FakeClient(projects, clips))
-
-    req = func.HttpRequest(
-        method="POST",
-        url="http://localhost/api/analyze-library",
-        body=json.dumps({}).encode(),
-        headers={"Content-Type": "application/json"},
-    )
-    resp = function_app.analyze_library(req)
-    payload = json.loads(resp.get_body())
-    assert resp.status_code == 200
-    assert payload["total_clips"] == 2
-    assert payload["recommended_total"] == 1

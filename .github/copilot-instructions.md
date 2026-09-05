@@ -1,32 +1,25 @@
 # Opus Schedule - Repository Instructions
 
 ## Mission
-Maintain and evolve the Azure Functions + Terraform pipeline that automates clip scheduling for LowOpsCast with high reliability, reproducibility, and clear operational diagnostics.
+Maintain and evolve the **local** clip-curation and scheduling toolchain for LowOpsCast: prepare
+clips from OpusClip, curate content by hand, and schedule posts via the OpusClip REST API.
+Reliability and reproducibility on a developer machine — no cloud infrastructure.
 
 ## Project Snapshot
-- Runtime: Python 3.13 in Azure Functions.
-- IaC: Terraform under infra/terraform.
-- CI/CD: .github/workflows/ci-validate.yml (jobs test, terraform-plan) and .github/workflows/deploy.yml (jobs terraform-apply, deploy-function). deploy runs on ci-validate success on main, or manual dispatch.
-- Cloud auth in CI: Azure OIDC with azure/login and audience api://AzureADTokenExchange.
+- Runtime: Python 3.12+ run locally (`tools/curate/` on top of `src/shared/`).
+- Distribution: OpusClip REST API (`api.opus.pro`) — the external service that actually publishes.
+- No Azure, no Terraform, no CI/CD — the cloud stack was decommissioned on 2026-09-05 (see README §8).
 
 ## Working Agreement
 - Always read current file content before editing.
 - Keep patches minimal and focused; avoid unrelated refactors.
-- Prefer deterministic commands and explicit error messages.
-- For Python changes under src, run targeted pytest for changed behavior.
-- For Terraform changes, run fmt, init, validate, and plan semantics locally when possible.
+- For Python changes under `src`, run targeted pytest: `cd src && PYTHONPATH=. python -m pytest -q tests/`.
 
 ## Commit And Push Policy
-- You are authorized to commit and push to GitHub after making requested changes.
-- For user-requested fixes, the expected default is commit and push in the same turn after relevant validation succeeds.
-- Before commit/push, run relevant validation for the touched scope.
-- Use clear conventional messages, for example:
-  - ci: ...
-  - fix: ...
-  - chore: ...
+- Commit and push **only when the user asks**.
+- Use clear conventional messages (fix:, chore:, feat:, …).
 - Never expose secrets in commit messages, logs, or files.
 
 ## Safety Rails
-- Never commit local-only files such as local.settings.json, .env, virtualenvs, cache folders, or credentials.
-- If CI auth fails, keep diagnostics objective and separate auth failure from subscription or RBAC failure.
-- For Azure operations, preserve idempotent Terraform behavior and avoid destructive changes unless explicitly requested.
+- Never commit local-only files such as `.env`, virtualenvs, cache folders, or credentials.
+- `OPUSCLIP_API_KEY` lives in the local environment.

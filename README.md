@@ -1,16 +1,18 @@
 # LowOpsCast — Automação de Cortes e Distribuição Multi-Rede
 
 Automação para transformar episódios do podcast **LowOpsCast** (YouTube [@LowOps](https://www.youtube.com/@LowOps))
-em cortes verticais e distribuí-los **automaticamente** em YouTube Shorts, TikTok, Instagram, LinkedIn e
-Facebook, usando **OpusClip** (clipping por IA) + **API REST** + **Azure Functions**.
+em cortes verticais e distribuí-los em YouTube Shorts, TikTok, Instagram, LinkedIn e Facebook, usando
+**OpusClip** (clipping por IA) + **API REST**, orquestrado por um **harness local dirigido pelo Claude Code**.
 
-> Status: **Etapa 1 (MVP) implementada e deployada** em Azure Functions (Flex Consumption).
-> CI/CD verde (GitHub Actions + Terraform com state remoto). Etapas 2 e 3 pendentes.
+> Status: **roda 100% local** (`tools/curate/`) com **curadoria humana no meio**. O stack Azure
+> (Function App, Terraform, pipelines) foi **descomissionado em 2026-09-05** — quem publica de fato é a
+> API da OpusClip, chamada direto da máquina. O histórico da fase cloud fica no git.
 
 ## 1. Objetivo
 
-Cortar cada episódio novo em ~10–15 clips virais e publicar/agendar nas redes **sem intervenção manual**,
-com curadoria por tema + score, respeitando a cadência ideal de cada plataforma.
+Cortar cada episódio novo em ~10–15 clips e publicar/agendar nas redes respeitando a cadência ideal de
+cada plataforma, com **curadoria humana de conteúdo** (payoff/insight) sobre um **gate mecânico
+determinístico** — e não em piloto automático.
 
 ## 2. Descoberta-chave: são dois produtos diferentes
 
@@ -23,29 +25,28 @@ com curadoria por tema + score, respeitando a cadência ideal de cada plataforma
 
 Ambos exigem plano **Pro+**.
 
-## 3. Arquitetura
+## 3. Arquitetura (fluxo local)
 
 ```mermaid
 flowchart LR
-  A[Novo episódio<br/>@LowOps] -->|RSS 15min| B[Timer Function]
-  B --> C[POST /clip-projects<br/>+ webhook + brand template]
-  C --> D[OpusClip corta<br/>~10-15 clips]
-  D -->|webhook HMAC| E[HTTP Function]
-  E --> F[GET clips<br/>+ virality score]
-  F --> G[Curadoria: tema + score]
-  G --> H[Roteamento por rede<br/>top-N + horário]
-  H --> I[POST /publish-schedules<br/>escalonado + CTA]
-  I --> J[YT · TikTok · IG<br/>LinkedIn · FB]
+  A[Episódio processado<br/>na OpusClip] --> B[prep.py<br/>coleta clips + gate mecânico]
+  B --> C[Curadoria humana<br/>leio transcripts → verdicts.json]
+  C --> D[plan.py<br/>relatório + plano dry-run]
+  D --> E[schedule_queue.py --apply<br/>POST /publish-schedules]
+  E --> F[YT · TikTok · IG<br/>LinkedIn · FB]
 ```
 
-- **Trigger:** RSS do canal (`youtube.com/feeds/videos.xml?channel_id=...`) — grátis, sem API key.
-  Observação: episódios são **lives agendadas**; o RSS só lista o VOD após a live terminar e ser processada
-  (então o disparo acontece no momento certo, não no agendamento).
-- **Hospedagem:** Azure Functions em **Flex Consumption (FC1)**, região East US 2 (~$0 ocioso).
-  Hoje só o HTTP da Etapa 1 (`schedule-existing-clips`); Timer (RSS) + webhook chegam nas Etapas 2/3.
-  Estado/idempotência em **Table Storage** (`lowopscaststate`) no storage compartilhado. Segredos
-  injetados como app settings via `TF_VAR_*` (GitHub secrets) — ver §8.
-- **Importante:** ao ligar o script, **desligar o Auto-Import nativo** (senão clipa 2x = gasta créditos em dobro).
+- **Sem servidor:** tudo roda na máquina via `tools/curate/`. Não há Function, Timer nem webhook.
+- **Passo 1 — `prep.py`:** puxa os clips já processados na OpusClip (`GET /api/exportable-clips`) e aplica
+  o **gate mecânico** determinístico (`shared/judge.py` / `shared/clip_quality.py`): pausas/min,
+  repetições, cortes de fala, duração. Sem LLM.
+- **Passo 2 — curadoria humana:** leio os transcripts e escrevo `verdicts.json` (payoff/insight),
+  seguindo a rubrica única em `src/shared/curation_rubric.md`.
+- **Passo 3 — `plan.py`:** gera o relatório + o plano de agendamento (rede × horário × top-N via
+  `shared/schedule_matrix.build_schedule_plan`) **em dry-run** — não cria nada na OpusClip.
+- **Passo 4 — `schedule_queue.py --apply`:** só depois de revisar, cria os agendamentos de verdade
+  (`POST /api/publish-schedules`), com ledger local `review/_queue/scheduled.json` p/ idempotência.
+- **Importante:** manter o **Auto-Import nativo desligado** na OpusClip (senão clipa 2x = gasta créditos em dobro).
 
 ## 4. Dados reais das redes (jul/2026) e insights cruzados
 
@@ -110,79 +111,55 @@ flowchart LR
 - Limites: 30 req/min core; scheduler 1 req/s; cap 900 créditos/mês de API; concorrência 4 projetos
 - OpenAPI: https://help.opus.pro/api-reference/openapi.json
 
-## 8. Infraestrutura — modelo híbrido (reúso + stack próprio)
+## 8. Execução local
 
-A infra é gerida por **Terraform** (`infra/terraform`) com **state remoto** no backend
-`azurerm` (RG `rg-state-opus`, storage `stoopusstate`, container `statetf`). O stack **reutiliza**
-recursos compartilhados do `rg-jsearch` (East US 2) via `data sources` e **cria** apenas o que é
-específico do projeto.
+Não há mais infraestrutura em nuvem. O projeto roda inteiramente na máquina:
 
-**Reutilizado do `rg-jsearch` (somente leitura, via data sources):**
+- **Motor:** `src/shared/` (`opus_client`, `schedule_matrix`, `judge`, `clip_quality`,
+  `library_report`) — a mesma biblioteca que o Function App usava, agora chamada pelos scripts de
+  `tools/curate/`.
+- **Dependências:** `pip install -r src/requirements.txt`. O `azure-functions` sobrou como resíduo e
+  pode sair numa limpeza futura; os demais pacotes `azure-*` só entram em jogo se você reativar
+  telemetria/e-mail.
+- **Testes:** `cd src && PYTHONPATH=. python -m pytest -q tests/`.
+- **Segredos:** `OPUSCLIP_API_KEY` no ambiente local (antes vinha de GitHub secret / app setting).
+- **Notificação por e-mail (ACS):** opcional; só funciona com as credenciais ACS no ambiente.
 
-| Recurso | Tipo | Uso no projeto |
-|---|---|---|
-| `stjobfinderprodrandonix` | Storage Account | Runtime da função + Table `lowopscaststate` (idempotência) |
-| `appi-jobfinder-prod` | Application Insights | Telemetria e logs (OpenTelemetry) |
-| `acs-jobfinder-prod` + `orafaelferreira.com` | ACS Email | Notificações por e-mail (domínio já verificado) |
-| `aif-jobfinder-prod-randonix` (`gpt-5-mini`) | AI Foundry / Azure OpenAI | Judge no modo `hybrid` (hoje dormente) |
-
-**Criado por este stack (RG dedicado `rg-lowopscast-schedule`):**
-
-| Recurso | Detalhe |
-|---|---|
-| App Service Plan próprio | **Flex Consumption (FC1)** — Flex é 1 app por plano, então não dá para reusar o plano do jobfinder |
-| Function App `func-lowopscast-*` | Python 3.13, Linux, identidade gerenciada (System-Assigned) |
-| Container `lowopscast-app-package` | Pacote de deployment, no storage compartilhado |
-
-- **Segredos:** injetados como app settings via `TF_VAR_*` a partir de **GitHub secrets**
-  (`OPUSCLIP_API_KEY`) e connection strings resolvidas dos data sources (ACS, Storage). **Não** usa
-  Key Vault (o `kv-jf-prod-randonix` usa RBAC, que exigiria role assignments no CI) — migrar para KV
-  fica como hardening futuro.
-- **CI/CD:** `.github/workflows/ci-validate.yml` (testes + `terraform plan`) e `deploy.yml`
-  (`terraform apply` + `func publish`). O SP do CI precisa de **Storage Blob Data Contributor** no
-  `stoopusstate` (backend usa Azure AD; Owner não cobre o data plane de blob).
-- **Custo:** ~$0/mês (FC1 por consumo; demais recursos já existiam).
+> **Descomissionado em 2026-09-05:** removidos do repo `infra/terraform/` (Function App + FC1 + state
+> remoto), `.github/workflows/ci-validate.yml`, `deploy.yml` e `src/function_app.py` (handler HTTP).
+> Os recursos na Azure foram apagados manualmente. `rg-state-opus` (state remoto do Terraform) e o SP
+> `sp-site-orafael` ficaram sem uso. Nada em produção — a distribuição acontece pela API da OpusClip,
+> disparada localmente.
 
 ## 9. Decisões fechadas
 
 | Decisão | Escolha |
 |---|---|
 | Plano OpusClip | **Pro Anual** ($290/ano — 3.600 créditos/ano, ~40 eps) |
-| Linguagem das Functions | **Python 3.13** |
+| Linguagem | **Python 3.12+** (scripts locais) |
 | LinkedIn na automação | **Sim** — 2–3 clips curados/semana |
-| Notificação | **E-mail** via ACS + domínio `orafaelferreira.com` |
-| Trigger para lives | RSS detecta VOD automaticamente após live terminar |
-| Storage | Limpar projetos antigos no dashboard OpusClip antes de reativar |
-| Hospedagem | **Flex Consumption (FC1)** em plano próprio (Flex é 1 app/plano) — East US 2 |
-| Reutilizar infra jobfinder | Sim, via `data sources` — Storage, App Insights, ACS+domínio, AI Foundry |
-| State do Terraform | Backend remoto `azurerm` (`rg-state-opus`/`stoopusstate`/`statetf`) |
-| Segredos | App settings via `TF_VAR_*`/GitHub secrets (sem Key Vault por ora) |
-| Judge (curadoria LLM) | Dormente (`rules_only`); usa `gpt-5-mini` do Foundry existente ao ligar `hybrid` |
+| Notificação | **E-mail** via ACS + domínio `orafaelferreira.com` (opcional, local) |
+| Storage OpusClip | Limpar projetos antigos no dashboard antes de reativar |
+| Execução | **100% local** via `tools/curate/` — sem Azure, sem CI/CD |
+| Curadoria | **Gate mecânico** determinístico (`shared/judge.py`) + **curadoria humana** de conteúdo; sem LLM judge |
 
-## 10. Roadmap em 3 etapas
+## 10. Fluxo de trabalho (por episódio)
 
-### Etapa 1 — MVP com clips existentes *(✅ concluída — deployada)*
-1. Function HTTP `schedule-existing-clips` lê clips **já processados** (via `GET /api/exportable-clips`).
-2. Ranqueia top-N e aplica a matriz de cadência por rede. O ranqueamento (`_clip_score`) usa três
-   tiers, em ordem de confiança: (1) **score de conteúdo da Judge LLM** (`_content_score`, anexado
-   quando `judge_mode=hybrid` — julga payoff/insight real); (2) **virality score** nativo da OpusClip,
-   se presente (o schema público de `exportable-clips` não o expõe, então o código sonda nomes
-   conhecidos como `viralityScore`); (3) `durationMs` como proxy, quando não há score. Um tier
-   superior sempre vence, então um corte curto e ótimo ganha de um corte longo e raso.
-3. Cria agendamentos via `POST /api/publish-schedules`, com **idempotência** em Table Storage
-   (não reagenda o mesmo clip+rede) e resumo por e-mail (ACS).
-4. Curadoria opcional pela **Judge** (`off`/`rules_only`/`hybrid`; hoje `rules_only`).
-5. **Pendente:** validação funcional com um `collection_id` real do dashboard (dry-run).
+1. **Preparar** — `python tools/curate/prep.py …`: coleta os clips já processados na OpusClip
+   (`GET /api/exportable-clips`) e aplica o gate mecânico (pausas/min, repetições, cortes, duração).
+2. **Curar** — leio os transcripts e escrevo `verdicts.json` (payoff/insight real), pela rubrica em
+   `src/shared/curation_rubric.md`.
+3. **Planejar** — `python tools/curate/plan.py …`: relatório + plano de agendamento (rede × horário ×
+   top-N) em **dry-run**. O ranqueamento (`_clip_score`) usa, em ordem de confiança: (1) **score de
+   conteúdo da minha curadoria**; (2) **virality score** nativo da OpusClip, se presente (o schema
+   público de `exportable-clips` não o expõe, então o código sonda nomes como `viralityScore`);
+   (3) `durationMs` como proxy. Um tier superior sempre vence — corte curto e ótimo ganha de longo e raso.
+4. **Agendar** — `python tools/curate/schedule_queue.py --apply …`: cria os agendamentos
+   (`POST /api/publish-schedules`), com idempotência via ledger local `review/_queue/scheduled.json`.
 
-### Etapa 2 — Episódios prontos ainda não publicados
-1. Subir para o OpusClip os episódios gravados mas ainda não processados.
-2. `POST /api/clip-projects` com URL do YouTube → clipagem → reutilizar pipeline da Etapa 1.
-3. **Objetivo:** validar o fluxo completo de clipagem + agendamento.
-
-### Etapa 3 — Automação completa com RSS *(futuro)*
-1. Timer Function a cada 15 min monitora RSS do `@LowOps`.
-2. Detecta novo VOD pós-live → dispara clipagem → webhook → curadoria → agendamento automático.
-3. **Objetivo:** pipeline 100% hands-off a cada novo episódio.
+> **Automação hands-off (RSS/Timer/webhook) foi descartada.** O modelo escolhido é curadoria humana por
+> episódio — incompatível com agendar sozinho. O histórico dessa ideia (as antigas Etapas 2/3 e o
+> Function App) fica no git.
 
 ## 11. Fontes (cadência)
 

@@ -3,6 +3,13 @@
 ## Scope
 This file defines mandatory behavior for AI agents working in this repository.
 
+## Project reality (as of 2026-09-05)
+LowOpsCast runs **100% locally**. There is no Azure infrastructure, no Function App, and no
+CI/CD pipeline anymore — all decommissioned (see README §8). The workflow is: prepare clips →
+**human content curation** → plan (dry-run) → schedule via the OpusClip API, all driven from
+`tools/curate/` on top of the `src/shared/` library. OpusClip (`api.opus.pro`) is the external
+service that actually publishes.
+
 ## Core Rules
 - Keep changes minimal and related to the user request.
 - Validate touched scope before finalizing work.
@@ -16,39 +23,25 @@ domains below. Load the matching skill before working in that area instead of re
 |---|---|
 | `opusclip-api` | any call to api.opus.pro, `src/shared/opus_client.py`, payload/4xx debugging |
 | `distribution-strategy` | `schedule_matrix.py`, clip ranking, CTA, cadence, credits — the editorial policy |
-| `clip-curation-internals` | `judge.py`, `clip_quality.py`, `library_report.py`, any `JUDGE_*` var, hybrid mode — the mechanics |
-| `writing-tests` | new or failing tests in `src/tests/`, adding a telemetry counter, opaque 500 in a handler test |
-| `shipping-changes` | validation, commit/push, `ci-validate` → `deploy` chain, red CI, Terraform traps |
-| `azure-diagnostics` | production telemetry, App Insights KQL, `lowopscaststate`, storage quota |
+| `clip-curation-internals` | `judge.py`, `clip_quality.py`, `library_report.py`, the `tools/curate/` harness, the curation rubric |
+| `writing-tests` | new or failing tests in `src/tests/` |
+| `shipping-changes` | local validation and commit/push flow |
 
-Curation is split on purpose: `distribution-strategy` holds *what* to publish and when,
-`clip-curation-internals` holds *how* the two LLM paths actually work. A change to the editorial
-rubric usually touches both `shared/judge.py` and `shared/clip_quality.py` — see that skill.
+Curation is split on purpose: `distribution-strategy` holds *what* to publish and when;
+`clip-curation-internals` holds *how* the mechanical gate and the local curation harness work.
 
-## Platform Expertise (plugins, not hand-written)
-Azure and Terraform expertise comes from installed plugins declared in `.claude/settings.json`, so
-do not re-document it by hand. Plugin skills are namespaced:
-
-| Namespace | Source | Covers |
-|---|---|---|
-| `/azure:*` | `azure@claude-plugins-official` | Azure diagnostics, App Insights instrumentation, storage, Kusto/KQL, cost, AI/Foundry, RBAC (+ Azure MCP server) |
-| `/terraform-skill:*` | `terraform-skill@antonbabenko` | Terraform testing, modules, remote state, CI/CD, security scanning |
-| `/azure-agent-skills:*` | `azure-agent-skills@microsoft-agent-skills` | 193 Microsoft Learn skills (azure-functions, azure-monitor, azure-table-storage, …) |
-
-The `.claude/skills/` entries above stay authoritative for **this project's** decisions where they
-conflict with generic platform guidance.
-
-## Commit And Push Authorization
-- Agents are authorized to commit and push after implementing requested changes.
-- When the user asks for a fix in CI/CD or infrastructure, default behavior is to commit and push the relevant files in the same turn after validations pass.
-- Stage only relevant files and avoid unrelated modifications.
-- Use conventional commit messages and include a short validation summary in the final report.
+> **Stale skills:** parts of `shipping-changes` and `azure-diagnostics` still describe the old
+> Azure/CI/Terraform pipeline and the LLM Judge/Foundry — both gone. Trust the code and README
+> over those descriptions until the skills are updated.
 
 ## Validation Expectations
-- Python changes: targeted pytest under src/tests.
-- Terraform changes: fmt, init, validate, and plan semantics where possible.
-- CI changes: ensure workflow syntax and logical conditions are consistent.
+- Python changes: `cd src && PYTHONPATH=. python -m pytest -q tests/` (targeted where possible).
+
+## Commit And Push
+- Commit and push **only when the user asks** — do not commit/push automatically.
+- Stage only relevant files; avoid unrelated modifications.
+- Use conventional commit messages and include a short validation summary in the final report.
 
 ## Security Expectations
 - Never commit secrets, credentials, local settings, virtual environments, or cache artifacts.
-- Respect repository gitignore and avoid leaking sensitive data in logs.
+- `OPUSCLIP_API_KEY` lives in the local environment, never in the repo.

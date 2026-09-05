@@ -14,8 +14,8 @@ Desde 2026-09-02 o **Azure AI Foundry (`gpt-5-mini`) foi arrancado** de `judge.p
 `clip_quality.py` e do Terraform. Não há mais chamada de LLM remoto em lugar nenhum do código.
 A verificação agora tem **duas camadas separadas**:
 
-1. **Gate mecânico determinístico** (no código, roda no cloud e localmente) — limpeza de fala e
-   duração. Só isso corre dentro do Function App.
+1. **Gate mecânico determinístico** (no código, roda localmente via `tools/curate/` — não existe
+   mais Function App) — limpeza de fala e duração.
 2. **Curadoria de CONTEÚDO** (payoff/insight) — feita **localmente pelo Claude Code** via o harness
    em `tools/curate/`. Eu leio as transcrições e aplico a rubrica única em
    `src/shared/curation_rubric.md`, produzindo `verdicts.json`. Não é autônoma no cloud.
@@ -60,9 +60,9 @@ reprova). Ajuste de critério = editar **esse arquivo**, e eu o sigo no passo 2.
 
 ## Modos do judge mecânico (`shared/judge.py`)
 
-`function_app.py` liga o gate com `if judge_settings.mode == "rules_only"`.
+O harness liga o gate com `judge_settings.mode == "rules_only"` (default local).
 
-- `rules_only` — **modo de produção** (`main.tf`). Só as hard rules; devolve `final_score` uniforme
+- `rules_only` — **modo padrão**. Só as hard rules; devolve `final_score` uniforme
   **100** (não ordena nada — o ranking real usa `_content_score` do harness).
 - qualquer outro valor (`off`, typo, etc.) — cai no ramo `source="disabled"`: **aprova todos os
   clips sem filtrar**. Não há log nem erro. Se a curadoria "não está filtrando", conferir
@@ -97,12 +97,10 @@ se faz. `test_library_report.py` (`test_mechanical_gate_ignores_opus_native_scor
 ## A ponte para o ranking: `_content_score`
 
 `_content_score` (tier 2 de `schedule_matrix._clip_score`) é a melhor sinalização de viralidade.
-Hoje ela é anexada **pelo harness local** (`plan.py`, a partir do meu `final_score`), **não** pelo
-endpoint HTTP — a ponte antiga em `function_app.py` (que só existia no modo hybrid) foi removida.
-Portanto o endpoint `/schedule-existing-clips` sozinho ranqueia por tier 1/tier 0 (virality nativo /
-duração); tier 2 só aparece quando os clips chegam com `_content_score` do harness.
+Ela é anexada **pelo harness local** (`plan.py`, a partir do meu `final_score`) antes de chamar
+`build_schedule_plan`. Sem ela, o ranking cai para tier 1/tier 0 (virality nativo / duração).
 
-## Relatório (`/analyze-library`)
+## Relatório (`plan.py`, antigo `/analyze-library`)
 
 `recommended = passou_no_gate_mecânico`. Sem `use_llm`/`llm_scope` (removidos).
 `DEFAULT_EXCLUDE_PROJECT_IDS` (`library_report.py`) fixa os projetos de vídeo pessoal que ficam fora
