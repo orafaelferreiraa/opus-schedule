@@ -48,6 +48,20 @@ Leia antes de mexer em payload ou parsing:
    (páginas/perfis dentro da conta). YouTube e TikTok não usam.
 7. **`postDetail.title` tem limite de 100 chars** — o cliente já trunca; mantenha o truncamento
    se refatorar.
+8. **`GET /publish-schedules` LISTA de verdade — não está documentado, mas existe.** Descoberto
+   2026-09-06 (contradiz nota antiga que dizia "sem GET/list"). `GET /publish-schedules` sem `q`
+   dá 400, mas o corpo do erro **revela os valores aceitos**: `{"errorMessage":"unsupported q
+   parameter... Supported values: byPage, findByProjectAndClip"}`. Use
+   `GET /publish-schedules?q=byPage` → `{"data":{"data":[...], "meta":{"page","nextPage","total"}}}`.
+   Retornou os **471 agendamentos inteiros numa única chamada** (sem paginar de verdade — os
+   parâmetros `page`/`pageSize` testados não mudaram o resultado). **Cada item NÃO tem `clipId`
+   nem `projectId`** — só `scheduleId`, `platform`, `postDetail.{title,thumbnailUrl}`, `publishAt`,
+   `extUserId`, `extOrgId`. Pra cruzar com o que o projeto criou, combine por `platform` +
+   `postDetail.title` (+ `publishAt` aproximado) — não por clipId. Útil pra **auditar de verdade**
+   o que está agendado (em vez de confiar só no ledger local `review/_queue/scheduled.json`), e
+   pra achar duplicatas reais (mesmo título aparecendo 2x na mesma `platform`).
+   **Técnica geral:** quando uma rota não-documentada devolver 400 num GET, o corpo do erro pode
+   revelar os `q` aceitos — vale tentar `GET` sem parâmetros antes de assumir que não existe list.
 
 ## Limites (respeitar, não "tentar")
 

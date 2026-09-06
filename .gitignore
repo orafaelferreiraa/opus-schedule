@@ -24,3 +24,4 @@ review/**/transcripts.md
 # src/.gitignore; redundância de segurança para nunca commitar por engano).
 src/local.settings.json
 local.settings.json
+tiktok.local.settings.json

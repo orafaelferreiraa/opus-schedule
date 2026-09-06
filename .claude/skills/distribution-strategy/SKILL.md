@@ -93,6 +93,39 @@ cloud. `JUDGE_MODE=rules_only` = só gate mecânico. A mecânica completa está 
 - Ao ligar a automação: **desligar o Auto-Import nativo** da OpusClip, senão clipa 2x e gasta
   crédito em dobro.
 
+## ⚠️ Pendência: dados reais de set/2026 contradizem a hierarquia acima
+
+Conectamos o **Buffer** (MCP, `mcp__buffer__*`) em 2026-09-06 pra analisar engajamento real —
+canais: LinkedIn (`orafaelferreiraa`), YouTube (`LowOps Channel`), Instagram (`orafaelferreira1`).
+TikTok **não está conectado** (Buffer free plan trava em 3 canais; TikTok é suportado, mas exigiria
+upgrade ou trocar um canal existente).
+
+**Últimos 30 dias (07/08–06/09/2026), por canal:**
+
+| Métrica | LinkedIn (25 posts) | YouTube (10 posts) | Instagram (26 posts) |
+|---|---:|---:|---:|
+| Views | 887 | 216 | **14.609** |
+| Reach | 25.279 | — (não retornado) | 8.538 |
+| Taxa de engajamento | 1,8% | 4,17% | **7,61%** |
+
+Isso **inverte** a hierarquia da tabela acima: Instagram apareceu como o canal mais forte (volume e
+engajamento), YouTube com números baixíssimos. **Não tratar isso ainda como fato conclusivo:**
+
+- O YouTube via Buffer devolveu bem menos métricas que os outros dois (sem `reach`/`impressions`) —
+  sinal de que a integração Buffer↔YouTube pode não estar capturando os Shorts de verdade. Os 710
+  posts do backlog (`schedule_queue.py --apply`, 2026-09-05/06) foram criados via **API da OpusClip
+  direto, não pelo Buffer** — são pipelines diferentes. Os "10 posts" que o Buffer viu são de outra
+  origem, não o canal inteiro.
+- Antes de confiar nessa comparação, precisa investigar se é limitação de escopo/OAuth do Buffer
+  com o YouTube, ou se reflete algo real.
+
+**Decisão do usuário (2026-09-06): NÃO mudar a matriz de cadência agora.** Ele vai reanalisar o
+Buffer **semana que vem** (~2026-09-13) com mais dados, porque os 710 posts já agendados via API não
+dão pra apagar/reordenar em massa (`DELETE /publish-schedules/{scheduleId}` existe mas é 1-a-1, ver
+skill `opusclip-api`) — qualquer mudança de prioridade só valeria pra conteúdo **futuro**, então não
+há pressa. Antes de tocar em `NETWORK_CONFIG`/`NET` por causa disso, espere o usuário confirmar com
+dado mais maduro E investigar o buraco de métricas do YouTube.
+
 ## Validação
 
 ```bash

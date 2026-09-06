@@ -122,10 +122,45 @@ POST /publish-schedules
 }
 ```
 
-- `publishAt`: **UTC**, ISO 8601.
+- `publishAt`: **UTC**, ISO 8601. Aceita horário **quase imediato** (testado com agora+5 min em
+  2026-09-06 — publicou normal), útil para tapar buraco de slot sem esperar a próxima janela.
 - Rate limit **1 req/s** — dormir ≥1,1 s entre chamadas.
-- Resposta: `{"data": {"scheduleId": "..."}}`.
+- Resposta: **201** com `{"data":{"scheduleId","postId","hasConflict","publishAt"}}` — o
+  `hasConflict` avisa se o horário colide com outro agendamento da mesma conta.
 - Não gasta crédito.
+- **Limite diário observado: 429 `"api rate limit exceeded", operation:"publish", limit:500,
+  window:"DAY"`** (achado 2026-09-05, aplicando um backlog de ~700 de uma vez). Não documentado
+  no OpenAPI. Ficar com headroom (ex.: ≤450/execução), não tentar os 500 exatos.
+
+### Listar agendamentos (não documentado, mas existe)
+
+```
+GET /publish-schedules?q=byPage
+→ {"data": {"data": [ {scheduleId, extUserId, extOrgId, platform, postDetail:{title,thumbnailUrl}, publishAt}, ... ],
+            "meta": {"page", "nextPage", "total"}}}
+```
+
+Descoberto 2026-09-06: `GET /publish-schedules` sem `q` dá 400, mas o corpo revela os valores
+aceitos (`"Supported values: byPage, findByProjectAndClip"`). `q=byPage` devolveu os **471
+agendamentos da conta inteira numa chamada só** (sem truncar — `page`/`pageSize` testados não
+mudaram nada). **Não tem `clipId`/`projectId`** — só dá pra cruzar com os clips do projeto por
+`platform` + `postDetail.title` (+ `publishAt`). É a forma de **auditar de verdade** o que está
+agendado (em vez de confiar só no ledger local) e achar duplicatas reais.
+
+### Apagar um agendamento (não documentado, mas existe)
+
+```
+DELETE /publish-schedules/{scheduleId}
+```
+
+Descoberto 2026-09-06 e **confirmado com `scheduleId` reais no mesmo dia**: devolve **200
+`{"data":{}}`** e o agendamento some do `GET ?q=byPage` (validado apagando 3 agendamentos —
+2 duplicatas em YouTube/TikTok e 1 do Instagram que foi remanejado). Com ID falso devolve 400
+`{"errorMessage":"Schedule task not found","errorName":"BadRequestError"}`. `scheduleId` vem do
+item retornado por `GET /publish-schedules?q=byPage` (ex.: `"1788615219038dgRU-YOUTUBE"`).
+Não existe update/move: para remanejar um post é **DELETE + POST novo**, 1 a 1.
+Variante `DELETE /publish-schedules?scheduleId=...` NÃO funciona sozinha — exige também
+`source` e `projectId` como query params (`"source and projectId query params are required"`).
 
 ## Webhook
 

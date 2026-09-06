@@ -16,7 +16,7 @@ import argparse
 import json
 import os
 import sys
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 REPO = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 SRC = os.path.join(REPO, "src")
@@ -50,6 +50,16 @@ NET = {
     "INSTAGRAM_BUSINESS": {"hours": [18],     "gap": 20, "days": []},  # Reels: noite (18h), todo dia
     "LINKEDIN":           {"hours": [17],     "gap": 20, "days": [0, 1, 3]},   # seg/ter/qui, 17h (vídeo B2B)
 }
+
+# Rafael de férias — Instagram/LinkedIn (conteúdo curado, depende de engajamento pessoal) pausam;
+# YouTube/TikTok (volume automático) seguem normais. Intervalo inclusive; retomada em 2026-12-07.
+VACATION_START = date(2026, 11, 7)
+VACATION_END = date(2026, 12, 6)
+BLACKOUT_NETS = {"INSTAGRAM_BUSINESS", "LINKEDIN"}
+
+# Teto de segurança por execução do --apply: fica com headroom abaixo do limite diário de 500
+# publish observado na API OpusClip (HTTP 429 "api rate limit exceeded", window=DAY).
+MAX_CREATES_PER_RUN = 450
 
 
 def _bare(full_id):
@@ -145,12 +155,16 @@ def weave(a, b):
     return out
 
 
-def schedule(cfg, queue):
+def schedule(cfg, queue, net=None):
     from shared.schedule_matrix import BRT, _next_slot
     dt = datetime.now(BRT)
     rows = []
     for e in queue:
         slot = _next_slot(dt, cfg["hours"], cfg["days"])
+        if net in BLACKOUT_NETS and VACATION_START <= slot.date() <= VACATION_END:
+            resume_date = VACATION_END + timedelta(days=1)
+            resume = datetime(resume_date.year, resume_date.month, resume_date.day, tzinfo=BRT)
+            slot = _next_slot(resume, cfg["hours"], cfg["days"])
         rows.append((slot, e))
         dt = slot + timedelta(hours=cfg["gap"])
     return rows
@@ -179,8 +193,15 @@ def main():
     ap.add_argument("--limit", type=int, default=0, help="no --apply, cria só os N primeiros por rede (lote de teste; 0 = todos)")
     ap.add_argument("--date", default="", help="no --apply, cria só os posts DESSA data BRT (YYYY-MM-DD)")
     ap.add_argument("--preview", type=int, default=10, help="quantos posts mostrar por rede no terminal")
+    ap.add_argument("--audit", action="store_true",
+                     help="lista as entradas do ledger (data/hora/título) pra conferir contra o "
+                          "calendário real da OpusClip — não aplica nada, só imprime")
     args = ap.parse_args()
     _load_settings()
+
+    if args.audit:
+        _audit()
+        return
 
     queues, podcast, personal = build_queues()
     print(f"Baldes: podcast={len(podcast)}  pessoal={len(personal)}  total={len(podcast)+len(personal)}")
@@ -193,7 +214,7 @@ def main():
           f"CTA em toda descrição: _{CTA}_\n"]
     dias = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]
     for net, cfg in NET.items():
-        rows = schedule(cfg, queues[net])
+        rows = schedule(cfg, queues[net], net)
         plan[net] = rows
         n_pod = sum(1 for _, e in rows if e["source"] == "podcast")
         header = f"## {net} — {len(rows)} posts ({n_pod} podcast / {len(rows)-n_pod} pessoal)"
@@ -265,6 +286,36 @@ def _save_ledger(done):
     json.dump(sorted(done), open(_LEDGER, "w"), ensure_ascii=False, indent=2)
 
 
+def _audit():
+    """Lista as entradas do ledger (data/hora/título) por rede pra conferir contra o calendário
+    real da OpusClip (a API não tem GET/list de publish-schedules — não dá pra verificar sozinho).
+    Não aplica nem apaga nada; é insumo pra reconciliar manualmente `scheduled.json`."""
+    plan_path = os.path.join(REPO, "review", "_queue", "posting_plan.json")
+    if not os.path.exists(plan_path):
+        print("Nenhum review/_queue/posting_plan.json encontrado — rode o dry-run primeiro (sem --apply).")
+        return
+    plan = json.load(open(plan_path))
+    done = _load_ledger()
+    dias = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]
+    print(f"Ledger: {len(done)} entradas confirmadas no total.\n"
+          "⚠️ A data/hora abaixo é recalculada a partir de AGORA — NÃO é necessariamente a data/hora\n"
+          "real enviada à API (que dependia do 'agora' de quando o --apply rodou). Reconcilie pelo\n"
+          "TÍTULO e pela ORDEM dentro da rede, não pelo horário exato. Qualquer 'NET|clipId' cujo\n"
+          "título você não encontrar de verdade no calendário da OpusClip (foi duplicata excluída)\n"
+          "me diga pra eu tirar do ledger.\n")
+    AUDIT_LIMIT = 30  # o começo da fila = o que aparece mais cedo no calendário real
+    for net, rows in plan.items():
+        marked = [r for r in rows if f"{net}|{r['clipId']}" in done]
+        print(f"## {net} — {len(marked)} marcados como criados no ledger"
+              f"{f' (mostrando os {AUDIT_LIMIT} primeiros)' if len(marked) > AUDIT_LIMIT else ''}")
+        for i, r in enumerate(marked[:AUDIT_LIMIT], 1):
+            slot = datetime.fromisoformat(r["publishAt_brt"])
+            print(f"  #{i:<3} {net}|{r['clipId']}  (ref. {dias[slot.weekday()]} {slot.strftime('%d/%m %H:%M')})  {r['title'][:60]}")
+        if len(marked) > AUDIT_LIMIT:
+            print(f"  … +{len(marked)-AUDIT_LIMIT} restantes (peça se precisar ver todos)")
+        print()
+
+
 def _apply(plan):
     from shared.opus_client import OpusClient
     client = OpusClient()
@@ -274,8 +325,12 @@ def _apply(plan):
         by_plat.setdefault(str(a.get("platform", "")).upper(), []).append(a)
 
     done = _load_ledger()  # idempotência local: "NET|clipId" já agendados
-    api_plan = {}
+    total_created = 0
     for net, rows in plan.items():
+        if total_created >= MAX_CREATES_PER_RUN:
+            print(f"TETO DE SEGURANÇA atingido ({MAX_CREATES_PER_RUN}/execução) — {net} e o resto "
+                  "ficam para a próxima rodada (rode de novo depois).")
+            break
         accs = by_plat.get(net, [])
         if not accs:
             print(f"AVISO: rede {net} sem conta conectada — pulando {len(rows)} posts.")
@@ -287,6 +342,12 @@ def _apply(plan):
         if not rows:
             print(f"{net}: todos já agendados (ledger) — nada a fazer.")
             continue
+        budget = MAX_CREATES_PER_RUN - total_created
+        if len(rows) > budget:
+            print(f"{net}: {len(rows)} pendentes, mas só cabem {budget} no teto desta execução — "
+                  "o resto fica pra próxima rodada.")
+            rows = rows[:budget]
+
         print(f"{net}: postando como '{acc.get('extUserName')}' ({len(rows)} novos)")
         items = []
         for slot, e in rows:
@@ -299,18 +360,20 @@ def _apply(plan):
             if acc.get("subAccountId"):
                 it["subAccountId"] = acc["subAccountId"]
             items.append(it)
-        api_plan[net] = items
 
-    total = sum(len(v) for v in api_plan.values())
-    print(f"\nAPPLY: criando {total} agendamentos (1 req/s)...")
-    results = client.create_schedules(api_plan)
-    ok = 0
-    for r in results:
-        if r.get("ok"):
-            ok += 1
-            done.add(f"{str(r.get('network','')).upper()}|{r.get('clipId','')}")
-    _save_ledger(done)
-    print(f"criados {ok}/{len(results)} (falhas: {len(results)-ok}). Ledger: {len(done)} agendados no total.")
+        print(f"APPLY {net}: criando {len(items)} agendamentos (1 req/s)...")
+        results = client.create_schedules({net: items})
+        ok = 0
+        for r in results:
+            if r.get("ok"):
+                ok += 1
+                total_created += 1
+                done.add(f"{str(r.get('network','')).upper()}|{r.get('clipId','')}")
+        _save_ledger(done)  # persiste JÁ (por rede) — sobrevive a interrupção/crash no meio
+        print(f"{net}: criados {ok}/{len(results)} (falhas: {len(results)-ok}). "
+              f"Ledger salvo ({len(done)} no total).\n")
+
+    print(f"RESUMO: {total_created} criados nesta execução. Ledger: {len(done)} agendados no total.")
 
 
 if __name__ == "__main__":
